@@ -4,6 +4,23 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
-    targetCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
+
+dependencies {
+
+	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0"
+
+	implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
+
+	implementation "org.jsoup:jsoup:1.14.2"
+
+	implementation "com.itextpdf:itextpdf:5.5.13.2"
+	implementation "org.apache.pdfbox:pdfbox:2.0.24"
+
+	implementation "com.sksamuel.scrimage:scrimage-core:4.0.22"
+	
+}
+
