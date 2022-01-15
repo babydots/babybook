@@ -1,12 +1,10 @@
-package com.serwylo.picturebook.book
+package com.serwylo.babybook.book
 
-import com.serwylo.book.mediawiki.makePages
-import com.serwylo.book.pdf.generatePdf
+import com.serwylo.babybook.mediawiki.makePages
+import com.serwylo.babybook.pdf.generatePdf
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.ExperimentalSerializationApi
 import java.io.File
 
-@ExperimentalSerializationApi
 fun makeBook(
     bookTitle: String,
     pageTitles: List<String>,

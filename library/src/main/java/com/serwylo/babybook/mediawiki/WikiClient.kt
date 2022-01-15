@@ -1,17 +1,16 @@
-package com.serwylo.book.mediawiki
+package com.serwylo.babybook.mediawiki
 
-import com.serwylo.picturebook.book.BookConfig
-import com.serwylo.picturebook.book.Page
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
+import com.serwylo.babybook.book.BookConfig
+import com.serwylo.babybook.book.Page
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.*
-import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
@@ -19,7 +18,6 @@ import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.util.*
 
-@ExperimentalSerializationApi
 suspend fun makePages(
     pageTitles: List<String>,
     config: BookConfig,
@@ -32,7 +30,6 @@ suspend fun makePages(
     return@coroutineScope pageJobs.awaitAll()
 }
 
-@ExperimentalSerializationApi
 suspend fun makeBookPageFromWikiPage(title: String, config: BookConfig, cacheDir: File): Page {
     val pageCacheDir = File(cacheDir, title)
     if (!pageCacheDir.exists()) {
@@ -60,10 +57,9 @@ fun processTitle(title: String): String {
 
 val http = HttpClient(CIO) {
     install(JsonFeature)  {
-        serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
-            isLenient = true
-            ignoreUnknownKeys = true
-        })
+        serializer = GsonSerializer() {
+            setLenient()
+        }
     }
 }
 
@@ -89,8 +85,8 @@ fun deleteUninterestingCachedImages(cacheDir: File) {
 }
 
 /**
- * List of icons, WikeMedia logos, and other uninteresting images that we have seen in our experience which we don't
- * care for.
+ * List of icons, WikeMedia logos, and other uninteresting images that we have seen in our
+ * experience which we don't care for.
  */
 private val knownUninterestingImages: Set<String> = setOf(
     "Dagger-14-plain.png",
@@ -139,11 +135,11 @@ suspend fun searchWikiTitles(searchTerms: String): WikiSearchResults {
     return WikiSearchResults(response)
 }
 
-data class WikiSearchResults(
-    private val data: ParsedWikiSearchResults,
+class WikiSearchResults(
+    data: ParsedWikiSearchResults,
 ) {
 
-    fun getResults() = data.query.search.map {
+    val results = data.query.search.map {
         SearchResult(
             it.title,
             it.snippet,
@@ -158,20 +154,17 @@ data class WikiSearchResults(
     )
 }
 
-@Serializable
 data class ParsedWikiSearchResults(
     val batchcomplete: String,
     val `continue`: Continue? = null,
     val query: Query,
 ) {
 
-    @Serializable
     data class Query(
         val searchinfo: SearchInfo,
         val search: List<SearchResult>,
     )
 
-    @Serializable
     data class SearchResult(
         val ns: Int,
         val title: String,
@@ -182,12 +175,10 @@ data class ParsedWikiSearchResults(
         val timestamp: String,
     )
 
-    @Serializable
     data class SearchInfo(
         val totalhits: Int,
     )
 
-    @Serializable
     data class Continue(
         val sroffset: Int,
         val `continue`: String,
@@ -198,13 +189,12 @@ data class ParsedWikiSearchResults(
  * Fetch metadata about a wikipedia page.
  * Will cache the response, and if a cached response already exists on disk, will use that.
  */
-@ExperimentalSerializationApi
 suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage {
     val cachedFile = File(cacheDir, "${title}.json")
     if (cachedFile.exists()) {
         try {
             println("Cached wiki data exists at ${cachedFile.absolutePath}")
-            val wikiData: ParsedWikiPage = Json.decodeFromString(cachedFile.readText())
+            val wikiData: ParsedWikiPage = Gson().fromJson(cachedFile.readText(), ParsedWikiPage::class.java)
             return WikiPage(wikiData)
         } catch (e: Exception) {
             println("Error parsing cached wiki data, will remove it and then load from wikipedia again: ${e.message}")
@@ -234,7 +224,7 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage {
     }
 
     println("Caching wiki data to ${cachedFile.absolutePath}")
-    cachedFile.writeText(Json.encodeToString(response))
+    cachedFile.writeText(Gson().toJson(response))
 
     return responseWikiPage
 }
@@ -346,12 +336,10 @@ class WikiPage(
 
 }
 
-@Serializable
 data class ParsedWikiPage(
     val parse: Parse,
 ) {
 
-    @Serializable
     data class Parse(
         val title: String,
         val pageid: Long,
@@ -369,7 +357,6 @@ data class ParsedWikiPage(
         val properties: List<Property>,
     )
 
-    @Serializable
     data class Section(
         val toclevel: Int,
         val level: String,
@@ -381,67 +368,60 @@ data class ParsedWikiPage(
         val anchor: String,
     )
 
-    @Serializable
     data class Property(
         val name: String,
 
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
     )
 
-    @Serializable
     data class Template(
         val ns: Long,
 
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
 
         val exists: String = "",
     )
 
-    @Serializable
     data class Link(
         val ns: Long,
 
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
 
         val exists: String = "",
     )
 
-    @Serializable
     data class Category(
         val sortkey: String,
 
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
 
         val hidden: String = "",
     )
 
-    @Serializable
     data class IWLink(
         val prefix: String,
         val url: String,
 
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
     )
 
-    @Serializable
     data class LangLink(
         val lang: String,
         val url: String,
         val langname: String,
         val autonym: String,
 
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
     )
 
-    @Serializable
     data class Text(
-        @SerialName("*")
+        @SerializedName("*")
         val value: String,
     )
 }

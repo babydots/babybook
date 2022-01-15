@@ -1,10 +1,10 @@
-package com.serwylo.book.pdf
+package com.serwylo.babybook.pdf
 
 import com.itextpdf.text.*
 import com.itextpdf.text.pdf.ColumnText
 import com.itextpdf.text.pdf.PdfWriter
-import com.serwylo.picturebook.book.BookConfig
-import com.serwylo.picturebook.book.Page
+import com.serwylo.babybook.book.BookConfig
+import com.serwylo.babybook.book.Page
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.nio.JpegWriter
 import java.io.File

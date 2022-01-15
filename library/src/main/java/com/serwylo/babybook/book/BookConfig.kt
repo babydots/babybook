@@ -1,4 +1,4 @@
-package com.serwylo.picturebook.book
+package com.serwylo.babybook.book
 
 data class BookConfig(
     val titleFontSize: Float = 42f,

@@ -1,4 +1,4 @@
-package com.serwylo.picturebook.book
+package com.serwylo.babybook.book
 
 import java.io.File
 
