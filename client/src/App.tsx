@@ -36,6 +36,7 @@ function App() {
     const [pagesInPrep, setPagesInPrep] = useState<string[]>([])
     const [pagesPrepared, setPagesPrepared] = useState<IPageData[]>([])
 
+    console.log("Pages in prep: ", pagesInPrep)
     const onSubmit = () => {
         const params = new URLSearchParams()
         params.append("title", title)
@@ -51,6 +52,20 @@ function App() {
     const onExampleSelected = (example: IExampleBook) => {
         setTitle(example.title)
         setPages([...example.pages, ''])
+
+        example.pages.forEach(loadPage)
+    }
+
+    const loadPage = async (title: string) => {
+
+        setPagesInPrep(pagesInPrep.concat([title]))
+
+        const response = await fetch(`${getBaseUrl()}/wiki/page?title=${title}`)
+        const pageData: IPageData = await response.json()
+
+        setPagesPrepared(pagesPrepared.concat([pageData]));
+        setPagesInPrep(pagesInPrep.filter(p => p !== title));
+
     }
 
     const onUpdatePage = async (index: number, value: string) => {
@@ -63,15 +78,7 @@ function App() {
         }
 
         if (value !== '' && pagesPrepared.find(pageData => pageData.title === value) == null) {
-
-            setPagesInPrep(pagesInPrep.concat([value]))
-
-            const response = await fetch(`${getBaseUrl()}/wiki/page?title=${value}`)
-            const pageData: IPageData = await response.json()
-
-            setPagesPrepared(pagesPrepared.concat([pageData]));
-            setPagesInPrep(pagesInPrep.filter(p => p !== value));
-
+            await loadPage(value)
         }
     }
 
@@ -125,21 +132,21 @@ function App() {
                                 </Button>}
                     </Col>
                 </Row>
-                {pages.map((page, i) => {
+                <Row>
+                    {pages.map((page, i) => {
                     return (
-                        <Row key={`page-${i}`}>
-                            <Col sm={12} md={8} lg={4}>
-                                <PageInput
-                                    index={i}
-                                    value={page}
-                                    onChange={value => onUpdatePage(i, value)}
-                                    isFetchingPage={page !== "" && pagesInPrep.indexOf(page) !== -1}
-                                    pageData={pagesPrepared.find(pageData => pageData.title === page)}
-                                />
-                            </Col>
-                        </Row>
+                        <Col key={`page-${i}`} sm={12} md={8} lg={4}>
+                            <PageInput
+                                index={i}
+                                value={page}
+                                onChange={value => onUpdatePage(i, value)}
+                                isFetchingPage={page !== "" && pagesInPrep.indexOf(page) !== -1}
+                                pageData={pagesPrepared.find(pageData => pageData.title === page)}
+                            />
+                        </Col>
                     );
                 })}
+                </Row>
             </Form>
         </Container>
     );
@@ -190,13 +197,15 @@ type IPageInputProps = {
 function PageInput(props: IPageInputProps) {
     const id = `page${props.index}`
 
+    console.log(props)
+
     return (
-        <>
+        <div>
             <FormGroup>
                 <Label for={id}>
                     Page {props.index + 1}
-                    {props.isFetchingPage && <IconWrapper><Spinner size="sm" color="secondary">&nbsp;</Spinner></IconWrapper>}
-                    {props.pageData !== undefined && <IconWrapper><FaCheck color="#3b3" /></IconWrapper>}
+                    {props.isFetchingPage && <> <IconWrapper><Spinner size="sm" color="secondary">&nbsp;</Spinner></IconWrapper></>}
+                    {props.pageData !== undefined && <> <IconWrapper><FaCheck color="#3b3" /></IconWrapper></>}
                 </Label>
                 <div style={{position: "relative"}}>
                     <TitleSearch id={id} title={props.value} onChange={props.onChange} />
@@ -204,7 +213,7 @@ function PageInput(props: IPageInputProps) {
             </FormGroup>
             {props.pageData != null &&
                 <Card>
-                    <CardImg src={`/wiki/image/${props.pageData.title}/${props.pageData.image}`} />
+                    <CardImg src={`/wiki/image/${props.pageData.title}/${props.pageData.image}`} className="page-preview" />
                     <CardImgOverlay>
                         <span className="img-text-overlay card-title">{props.pageData.title}</span>
                     </CardImgOverlay>
@@ -212,12 +221,12 @@ function PageInput(props: IPageInputProps) {
                         <p className="img-text-overlay">{props.pageData.text}</p>
                     </CardImgOverlay>
                 </Card>}
-        </>
+        </div>
     )
 }
 
 const IconWrapper = (props: {children: any}) =>
-    <div className="icon-wrapper" style={{position: "absolute", top: "4px", bottom: "4px", right: "4px", display: "inline-block", width: "16px", height: "16px"}}>
+    <div className="icon-wrapper" style={{display: "inline-block", width: "16px", height: "16px"}}>
         {props.children}
     </div>
 
