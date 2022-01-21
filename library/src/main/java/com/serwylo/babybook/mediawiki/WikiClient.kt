@@ -151,7 +151,9 @@ class WikiSearchResults(
         val title: String,
         val snippet: String,
         val pageid: Int,
-    )
+    ) {
+        override fun toString() = title
+    }
 }
 
 data class ParsedWikiSearchResults(
