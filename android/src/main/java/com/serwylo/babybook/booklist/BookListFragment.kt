@@ -12,10 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.editbook.EditBookActivity
 import com.serwylo.babybook.R
+import com.serwylo.babybook.db.AppDatabase
 
 class BookListFragment : Fragment() {
 
-    private var columnCount = 1
+    private var columnCount = 2
 
     private lateinit var viewModel: BookListViewModel
 
@@ -26,7 +27,7 @@ class BookListFragment : Fragment() {
         viewModel = ViewModelProvider(this).get(BookListViewModel::class.java)
 
         arguments?.let {
-            columnCount = it.getInt(ARG_COLUMN_COUNT)
+            columnCount = it.getInt(ARG_COLUMN_COUNT, 2)
         }
     }
 
@@ -44,7 +45,7 @@ class BookListFragment : Fragment() {
                     else -> GridLayoutManager(context, columnCount)
                 }
 
-                adapter = BookListAdapter().also { adapter ->
+                adapter = BookListAdapter(context).also { adapter ->
 
                     adapter.setBookSelectedListener { book ->
                         startActivity(Intent(context, EditBookActivity::class.java).apply {

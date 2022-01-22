@@ -14,9 +14,19 @@
         <activity
             android:name=".editbook.EditBookPageActivity"
             android:exported="false" />
+            <!--android:parentActivityName=".editbook.EditBookActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".editbook.EditBookActivity" />
+        </activity>-->
         <activity
             android:name=".editbook.EditBookActivity"
             android:exported="false" />
+            <!--android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>-->
         <activity
             android:name=".MainActivity"
             android:exported="true">

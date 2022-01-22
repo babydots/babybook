@@ -17,6 +17,9 @@ interface BookDao {
     @Query("SELECT * FROM BookPage WHERE bookId = :bookId ORDER BY pageNumber ASC")
     fun getBookPages(bookId: Long): LiveData<List<BookPage>>
 
+    @Query("SELECT imagePath FROM BookPage WHERE bookId = :bookId AND imagePath IS NOT NULL ORDER BY pageNumber ASC LIMIT 0, 1")
+    fun getBookCoverImage(bookId: Long): String?
+
     @Insert
     fun insert(book: Book): Long
 

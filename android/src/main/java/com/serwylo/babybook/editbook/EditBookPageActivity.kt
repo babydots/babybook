@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.mediawiki.WikiSearchResults
+import com.serwylo.babybook.mediawiki.processTitle
 import com.serwylo.babybook.mediawiki.searchWikiTitles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,6 +37,8 @@ class EditBookPageActivity : AppCompatActivity() {
         binding = ActivityEditBookPageBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
+
+        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val bookId = intent.extras?.getLong(EXTRA_BOOK_ID, 0L) ?: 0L
         if (bookId <= 0) {
@@ -83,10 +86,16 @@ class EditBookPageActivity : AppCompatActivity() {
                 binding.loadingSpinner.visibility = View.VISIBLE
                 binding.loadingText.visibility = View.VISIBLE
                 binding.loadingText.text = "Loading details..."
+
+                binding.image.visibility = View.GONE
+                binding.bookPageTitleText.visibility = View.GONE
             } else {
                 Log.d(TAG, "setup: Updating view in response to !vm.isLoadingPage")
                 binding.loadingSpinner.visibility = View.GONE
                 binding.loadingText.visibility = View.GONE
+
+                binding.image.visibility = View.VISIBLE
+                binding.bookPageTitleText.visibility = View.VISIBLE
 
                 binding.save.isEnabled = true
             }
@@ -99,7 +108,7 @@ class EditBookPageActivity : AppCompatActivity() {
 
             // TODO: Maybe move into own observer - but that may cause issues as we type but have
             //       not yet selected anything.
-            binding.bookPageTitleText.text = viewModel.pageTitle.value
+            binding.bookPageTitleText.text = processTitle(viewModel.pageTitle.value ?: "")
         }
 
         viewModel.mainImage.observe(this) { image ->

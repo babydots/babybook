@@ -4,9 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.databinding.EditBookPageItemBinding
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.mediawiki.processTitle
+import com.squareup.picasso.Picasso
 
 class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder>() {
 
@@ -24,7 +28,17 @@ class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val page = values[position]
-        holder.titleView.text = page.title
+        holder.titleView.text = processTitle(page.title)
+        if (page.imagePath == null) {
+            holder.imageView.visibility = View.GONE
+        } else {
+            holder.imageView.visibility = View.VISIBLE
+            Picasso.get()
+                .load(page.imagePath)
+                .fit()
+                .centerCrop()
+                .into(holder.imageView)
+        }
         holder.root.setOnClickListener { pageSelectedListener?.invoke(page) }
     }
 
@@ -36,7 +50,8 @@ class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder
 
     inner class ViewHolder(binding: EditBookPageItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val root: View = binding.root
-        val titleView: TextView = binding.bookPageTitle
+        val titleView: TextView = binding.title
+        val imageView: AppCompatImageView = binding.image
     }
 
 }

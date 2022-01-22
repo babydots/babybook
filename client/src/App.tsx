@@ -36,7 +36,6 @@ function App() {
     const [pagesInPrep, setPagesInPrep] = useState<string[]>([])
     const [pagesPrepared, setPagesPrepared] = useState<IPageData[]>([])
 
-    console.log("Pages in prep: ", pagesInPrep)
     const onSubmit = () => {
         const params = new URLSearchParams()
         params.append("title", title)
@@ -63,8 +62,8 @@ function App() {
         const response = await fetch(`${getBaseUrl()}/wiki/page?title=${title}`)
         const pageData: IPageData = await response.json()
 
-        setPagesPrepared(pagesPrepared.concat([pageData]));
-        setPagesInPrep(pagesInPrep.filter(p => p !== title));
+        setPagesPrepared(prepared => prepared.concat([pageData]));
+        setPagesInPrep(inPrep => inPrep.filter(p => p !== title));
 
     }
 
@@ -196,8 +195,6 @@ type IPageInputProps = {
 
 function PageInput(props: IPageInputProps) {
     const id = `page${props.index}`
-
-    console.log(props)
 
     return (
         <div>

@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.widget.addTextChangedListener
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.Book
@@ -22,6 +22,8 @@ class EditBookActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         binding = ActivityEditBookBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -59,7 +61,7 @@ class EditBookActivity : AppCompatActivity() {
             }
         })
 
-        binding.pages.layoutManager = LinearLayoutManager(this)
+        binding.pages.layoutManager = GridLayoutManager(this, 2)
         binding.pages.adapter = EditBookPagesAdapter().also { adapter ->
 
             adapter.setPageSelectedListener { page ->

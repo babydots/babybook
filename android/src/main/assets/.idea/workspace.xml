@@ -2,16 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c44abe85-e77f-49b1-92e2-e4f7d481a2a9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../../../../.idea/ClojureProjectResolveSettings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../../.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../../.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../.idea/codeStyles/Project.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../../build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../res/values/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../../library/src/main/java/com/serwylo/babybook/mediawiki/WikiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../library/src/main/java/com/serwylo/babybook/mediawiki/WikiClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/booklist/BookListAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/booklist/BookListAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/booklist/BookListFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/booklist/BookListFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/db/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/db/AppDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/db/daos/BookDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/db/daos/BookDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/editbook/EditBookActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/editbook/EditBookActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/editbook/EditBookPageActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/editbook/EditBookPageActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/serwylo/babybook/editbook/EditBookPagesAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/serwylo/babybook/editbook/EditBookPagesAdapter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../res/layout/edit_book_page_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../res/layout/edit_book_page_item.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../res/layout/fragment_book_list.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../res/layout/fragment_book_list.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,7 +131,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1642391911805</updated>
-      <workItem from="1642391912959" duration="6639000" />
+      <workItem from="1642391912959" duration="7419000" />
+      <workItem from="1642846373581" duration="66000" />
     </task>
     <servers />
   </component>
