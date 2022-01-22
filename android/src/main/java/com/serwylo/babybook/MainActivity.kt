@@ -15,7 +15,6 @@ class MainActivity : AppCompatActivity() {
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

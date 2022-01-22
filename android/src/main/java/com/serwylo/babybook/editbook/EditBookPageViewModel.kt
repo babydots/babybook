@@ -7,13 +7,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.mediawiki.downloadImages
 import com.serwylo.babybook.mediawiki.loadWikiPage
 import kotlinx.coroutines.launch
+import java.io.File
 
 class EditBookPageViewModel(private val application: Application, val bookId: Long, private val existingBookPage: BookPage? = null): ViewModel() {
 
     val pageTitle = MutableLiveData(existingBookPage?.title ?: "")
     val pageText = MutableLiveData(existingBookPage?.text ?: "")
+    val mainImage = MutableLiveData<String?>(existingBookPage?.imagePath)
+    val allImages = MutableLiveData(listOf<File>())
 
     val isSearchingPages = MutableLiveData(false)
     val isLoadingPage = MutableLiveData(false)
@@ -23,7 +27,14 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             isLoadingPage.value = true
 
             val details = loadWikiPage(title, application.cacheDir)
-            pageText.value = details.parseParagraphs()[0]
+            val images = downloadImages(details.getImageNamesOfInterest(), application.cacheDir)
+
+            pageText.value = details.parseParagraphs().firstOrNull() ?: ""
+            allImages.value = images
+
+            images.firstOrNull()?.also { image ->
+                mainImage.value = "file://${image.absolutePath}"
+            }
 
             isLoadingPage.value = false
         }
@@ -46,7 +57,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                     title = pageTitle.value ?: "",
                     text = pageText.value,
                     bookId = bookId,
-                    imagePath = existingBookPage.imagePath,
+                    imagePath = mainImage.value
                 ).apply { id = existingBookPage.id }
 
                 dao.update(page)
@@ -56,7 +67,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                     title = pageTitle.value ?: "",
                     text = pageText.value,
                     bookId = bookId,
-                    imagePath = null,
+                    imagePath = mainImage.value
                 )
 
                 dao.insert(page)

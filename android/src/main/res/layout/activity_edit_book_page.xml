@@ -42,16 +42,47 @@
         app:layout_constraintTop_toTopOf="@id/book_page_title"
         app:layout_constraintBottom_toBottomOf="@id/book_page_title" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/book_page_text"
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        tools:src="@tools:sample/backgrounds/scenic"
+        android:scaleType="center"
         android:layout_margin="16dp"
-        tools:text="Blah"
         app:layout_constraintTop_toBottomOf="@id/book_page_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/save"
+        app:layout_constraintBottom_toTopOf="@id/save" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/book_page_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        tools:text="A bug is a thing which is cool to look at and fun to watch. Sometimes they are in the back yard. Sometimes they are in the park."
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:background="#88ffffff"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="@id/image"
+        app:layout_constraintEnd_toEndOf="@id/image"
+        app:layout_constraintBottom_toBottomOf="@id/image"
+        />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/book_page_title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        tools:text="Bug"
+        android:textSize="32sp"
+        android:textColor="@color/black"
+        android:background="#88ffffff"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="@id/image"
+        app:layout_constraintEnd_toEndOf="@id/image"
+        app:layout_constraintTop_toTopOf="@id/image"
+        app:layout_constraintHorizontal_bias="0.0"
         />
 
     <Button

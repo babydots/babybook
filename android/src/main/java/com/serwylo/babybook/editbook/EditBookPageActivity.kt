@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.lang.IllegalStateException
 import kotlin.math.min
+import com.squareup.picasso.Picasso
 
 
 class EditBookPageActivity : AppCompatActivity() {
@@ -61,9 +62,6 @@ class EditBookPageActivity : AppCompatActivity() {
 
     private fun setup() {
 
-        viewModel.pageTitle.observe(this) { title ->
-        }
-
         viewModel.isSearchingPages.observe(this) { isSearching ->
             if (isSearching) {
                 Log.d(TAG, "setup: Updating view in response to vm.isSearchingPages")
@@ -96,7 +94,25 @@ class EditBookPageActivity : AppCompatActivity() {
 
         viewModel.pageText.observe(this) { text ->
             Log.d(TAG, "setup: Updating view in response to pageText being updated: ${text.substring(0, min(text.length, 30))}")
+
             binding.bookPageText.text = text
+
+            // TODO: Maybe move into own observer - but that may cause issues as we type but have
+            //       not yet selected anything.
+            binding.bookPageTitleText.text = viewModel.pageTitle.value
+        }
+
+        viewModel.mainImage.observe(this) { image ->
+            if (image != null) {
+                Picasso.get()
+                    .load(image)
+                    .fit()
+                    .centerCrop()
+                    .into(binding.image)
+                binding.image.visibility = View.VISIBLE
+            } else {
+                binding.image.visibility = View.GONE
+            }
         }
 
         binding.save.setOnClickListener { onSave() }
@@ -119,6 +135,15 @@ class EditBookPageActivity : AppCompatActivity() {
                     viewModel.clearPage()
                 }
             }
+        }
+
+        viewModel.mainImage.value?.also { image ->
+            Picasso.get()
+                .load(image)
+                .fit()
+                .centerCrop()
+                .into(binding.image)
+            binding.image.visibility = View.VISIBLE
         }
 
     }
