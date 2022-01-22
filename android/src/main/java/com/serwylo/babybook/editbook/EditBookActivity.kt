@@ -4,17 +4,17 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.Book
+import com.serwylo.babybook.editbookpage.EditBookPageActivity
 
 class EditBookActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditBookBinding
-    private val viewModel: EditBookViewModel by viewModels()
+    private lateinit var viewModel: EditBookViewModel
     private val dao = AppDatabase.getInstance(this).bookDao()
 
     private val addPage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -23,8 +23,6 @@ class EditBookActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         binding = ActivityEditBookBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -32,10 +30,10 @@ class EditBookActivity : AppCompatActivity() {
         if (bookId == 0L) {
             AppDatabase.executor.execute {
                 val newBookId = dao.insert(Book("New Book"))
+                val pages = dao.getBookPages(newBookId)
 
                 runOnUiThread {
-                    viewModel.bookTitle.value = "New Book"
-                    viewModel.pages = dao.getBookPages(newBookId)
+                    viewModel = ViewModelProvider(this, EditBookViewModelFactory(application, newBookId, "New Book", pages)).get(EditBookViewModel::class.java)
                     setup(newBookId)
                 }
             }
@@ -44,8 +42,8 @@ class EditBookActivity : AppCompatActivity() {
                 val book = dao.getBook(bookId)
 
                 runOnUiThread {
-                    viewModel.bookTitle.value = book.title
-                    viewModel.pages = dao.getBookPages(bookId)
+                    val pages = dao.getBookPages(bookId)
+                    viewModel = ViewModelProvider(this, EditBookViewModelFactory(application, bookId, book.title, pages)).get(EditBookViewModel::class.java)
                     setup(bookId)
                 }
             }
@@ -71,7 +69,7 @@ class EditBookActivity : AppCompatActivity() {
                 })
             }
 
-            viewModel.pages?.observe(this) { pages ->
+            viewModel.pages.observe(this) { pages ->
                 adapter.setData(pages)
                 adapter.notifyDataSetChanged()
             }

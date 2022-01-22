@@ -1,4 +1,4 @@
-package com.serwylo.babybook.editbook
+package com.serwylo.babybook.editbookpage
 
 import android.content.Context
 import android.os.Build
@@ -38,8 +38,6 @@ class EditBookPageActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         val bookId = intent.extras?.getLong(EXTRA_BOOK_ID, 0L) ?: 0L
         if (bookId <= 0) {
             throw IllegalStateException("Expected $EXTRA_BOOK_ID to be > 0, but got 0")
@@ -51,14 +49,16 @@ class EditBookPageActivity : AppCompatActivity() {
                 Log.d(TAG, "onCreate: Loading page from DB")
                 val page = AppDatabase.getInstance(this).bookDao().getBookPage(existingId)
                 runOnUiThread {
-                    viewModel = ViewModelProvider(this, EditBookPageViewModelFactory(application, bookId, page)).get(EditBookPageViewModel::class.java)
+                    viewModel = ViewModelProvider(this, EditBookPageViewModelFactory(application, bookId, page)).get(
+                        EditBookPageViewModel::class.java)
                     Log.d(TAG, "onCreate: Page ${page.id} loaded, values assigned to ViewModel. Will call setup()")
                     setup()
                 }
             }
         } else {
             Log.d(TAG, "onCreate: New page, creating empty viewModel.")
-            viewModel = ViewModelProvider(this, EditBookPageViewModelFactory(application, bookId)).get(EditBookPageViewModel::class.java)
+            viewModel = ViewModelProvider(this, EditBookPageViewModelFactory(application, bookId)).get(
+                EditBookPageViewModel::class.java)
             setup()
         }
     }
@@ -130,7 +130,7 @@ class EditBookPageActivity : AppCompatActivity() {
         binding.bookPageTitle.setText(viewModel.pageTitle.value)
 
         binding.bookPageTitle.also {
-            it.setAdapter(AutocompleteAdapter(this))
+            it.setAdapter(AutocompleteAdapter())
 
             it.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
                 Log.d(TAG, "setup: Selected recommended value from wiki: ${binding.bookPageTitle.text}. Assigning to ViewModel.")
@@ -169,7 +169,7 @@ class EditBookPageActivity : AppCompatActivity() {
         const val EXTRA_BOOK_ID = "bookId"
     }
 
-    inner class AutocompleteAdapter(private val context: Context) : BaseAdapter(), Filterable {
+    inner class AutocompleteAdapter() : BaseAdapter(), Filterable {
         private val searchResults = mutableListOf<WikiSearchResults.SearchResult>()
 
         private var latestSearchTerms = ""
@@ -208,9 +208,7 @@ class EditBookPageActivity : AppCompatActivity() {
                 val results = FilterResults()
                 if (constraint != null && constraint.isNotEmpty()) {
                     runBlocking {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            viewModel.isSearchingPages.value = true
-                        }
+                        viewModel.isSearchingPages.postValue(true)
 
                         val searchResults = searchWikiTitles(constraint.toString())
 
@@ -220,9 +218,7 @@ class EditBookPageActivity : AppCompatActivity() {
                             results.count = searchResults.results.size
                         }
 
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            viewModel.isSearchingPages.value = false
-                        }
+                        viewModel.isSearchingPages.postValue(false)
                     }
                 }
                 return results

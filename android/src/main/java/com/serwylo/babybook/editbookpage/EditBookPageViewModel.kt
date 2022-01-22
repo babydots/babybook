@@ -1,4 +1,4 @@
-package com.serwylo.babybook.editbook
+package com.serwylo.babybook.editbookpage
 
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
