@@ -85,9 +85,9 @@ fun main() {
             }
 
             static {
-                files("/home/pete/code/babybook/client/build")
+                resources("public")
 
-                file("/", "/home/pete/code/babybook/client/build/index.html")
+                resource("/", "public/index.html")
             }
 
         }

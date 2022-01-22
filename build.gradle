@@ -16,3 +16,5 @@ buildscript {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task stage(dependsOn: [':web:dist'])

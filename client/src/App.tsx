@@ -57,7 +57,7 @@ function App() {
 
     const loadPage = async (title: string) => {
 
-        setPagesInPrep(pagesInPrep.concat([title]))
+        setPagesInPrep(inPrep => inPrep.concat([title]))
 
         const response = await fetch(`${getBaseUrl()}/wiki/page?title=${title}`)
         const pageData: IPageData = await response.json()

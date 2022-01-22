@@ -1,3 +1,12 @@
+pluginManagement {
+    plugins {
+        id 'org.siouan.frontend-jdk11' version '6.0.0'
+    }
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -6,6 +15,11 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Baby Book"
-include ':android'
+
+if (!hasProperty('excludeAndroid')) {
+    include ':android'
+}
+
 include ':library'
 include ':web'
+include ':client'

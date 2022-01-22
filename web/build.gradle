@@ -21,3 +21,38 @@ dependencies {
 	
 }
 
+project.ext.mainClassName = "com.serwylo.babybook.web.ServerKt"
+
+task run(dependsOn: classes, type: JavaExec) {
+    main = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    ignoreExitValue = true
+}
+
+// See: https://github.com/siouan/frontend-gradle-plugin/blob/master/examples/multi-projects-war-application/backend/build.gradle
+task processFrontendResources(type: Copy) {
+    group 'Frontend'
+    description 'Process frontend resources'
+    dependsOn project(':client').tasks.named('assembleFrontend')
+
+    from project(':client').buildDir
+    into file("${project.buildDir}/resources/main/public")
+}
+
+task dist(type: Jar) {
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+    duplicatesStrategy("exclude")
+    dependsOn [
+        processFrontendResources,
+        configurations.runtimeClasspath,
+        classes,
+    ]
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
