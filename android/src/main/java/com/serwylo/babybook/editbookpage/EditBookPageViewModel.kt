@@ -14,7 +14,7 @@ import java.io.File
 
 class EditBookPageViewModel(private val application: Application, val bookId: Long, private val existingBookPage: BookPage? = null): ViewModel() {
 
-    val pageTitle = MutableLiveData(existingBookPage?.title ?: "")
+    val pageTitle = MutableLiveData(existingBookPage?.wikiPageTitle ?: "")
     val pageText = MutableLiveData(existingBookPage?.text ?: "")
     val mainImage = MutableLiveData<String?>(existingBookPage?.imagePath)
     val allImages = MutableLiveData(listOf<File>())
@@ -56,7 +56,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             if (existingBookPage != null) {
                 val page = BookPage(
                     pageNumber = existingBookPage.pageNumber,
-                    title = pageTitle.value ?: "",
+                    wikiPageTitle = pageTitle.value ?: "",
                     text = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value
@@ -66,7 +66,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             } else {
                 val page = BookPage(
                     pageNumber = dao.countPages(bookId) + 1,
-                    title = pageTitle.value ?: "",
+                    wikiPageTitle = pageTitle.value ?: "",
                     text = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value

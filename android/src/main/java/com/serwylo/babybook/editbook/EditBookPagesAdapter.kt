@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.databinding.EditBookPageItemBinding
 import com.serwylo.babybook.db.entities.BookPage
@@ -28,7 +27,7 @@ class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val page = values[position]
-        holder.titleView.text = processTitle(page.title)
+        holder.titleView.text = processTitle(page.wikiPageTitle)
         if (page.imagePath == null) {
             holder.imageView.visibility = View.GONE
         } else {

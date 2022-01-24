@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey
 )
 data class BookPage(
     val pageNumber: Int,
-    val title: String,
+    val wikiPageTitle: String,
     val imagePath: String?,
     val text: String?,
 

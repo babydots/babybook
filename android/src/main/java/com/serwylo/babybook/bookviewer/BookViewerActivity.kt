@@ -4,11 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
-import com.serwylo.babybook.R
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
-import com.serwylo.babybook.editbook.EditBookViewModel
-import com.serwylo.babybook.editbook.EditBookViewModelFactory
 import com.serwylo.babybook.mediawiki.processTitle
 import com.squareup.picasso.Picasso
 
@@ -64,7 +61,7 @@ class BookViewerActivity : AppCompatActivity() {
                         .into(binding.image)
                 }
 
-                binding.title.text = processTitle(page.title)
+                binding.title.text = processTitle(page.wikiPageTitle)
                 binding.text.text = page.text
             }
         }
