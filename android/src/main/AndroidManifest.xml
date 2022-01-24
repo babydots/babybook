@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BabyBook">
         <activity
+            android:name=".bookviewer.BookViewerActivity"
+            android:launchMode="singleTop"
+            android:exported="false"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
             android:name=".editbookpage.EditBookPageActivity"
             android:exported="false"
             android:parentActivityName=".editbook.EditBookActivity">
@@ -22,7 +31,6 @@
         <activity
             android:name=".editbook.EditBookActivity"
             android:exported="false"
-            android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -1,6 +1,5 @@
 package com.serwylo.babybook.editbookpage
 
-import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +9,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
@@ -17,8 +17,7 @@ import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.mediawiki.WikiSearchResults
 import com.serwylo.babybook.mediawiki.processTitle
 import com.serwylo.babybook.mediawiki.searchWikiTitles
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.serwylo.babybook.utils.debounce
 import kotlinx.coroutines.runBlocking
 import java.lang.IllegalStateException
 import kotlin.math.min
@@ -69,7 +68,6 @@ class EditBookPageActivity : AppCompatActivity() {
             if (isSearching) {
                 Log.d(TAG, "setup: Updating view in response to vm.isSearchingPages")
                 binding.bookPageText.text = ""
-                binding.save.isEnabled = false
                 binding.loadingSpinner.visibility = View.VISIBLE
                 binding.loadingText.visibility = View.VISIBLE
                 binding.loadingText.text = "Searching Wikipedia..."
@@ -96,8 +94,6 @@ class EditBookPageActivity : AppCompatActivity() {
 
                 binding.image.visibility = View.VISIBLE
                 binding.bookPageTitleText.visibility = View.VISIBLE
-
-                binding.save.isEnabled = true
             }
         }
 
@@ -124,23 +120,17 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        binding.save.setOnClickListener { onSave() }
-
-        Log.d(TAG, "setup: Setting initial text input to ${viewModel.pageTitle.value}")
         binding.bookPageTitle.setText(viewModel.pageTitle.value)
 
         binding.bookPageTitle.also {
             it.setAdapter(AutocompleteAdapter())
 
             it.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
-                Log.d(TAG, "setup: Selected recommended value from wiki: ${binding.bookPageTitle.text}. Assigning to ViewModel.")
                 val newTitle = binding.bookPageTitle.text.toString()
                 viewModel.pageTitle.value = newTitle
                 if (newTitle.isNotEmpty()) {
-                    Log.d(TAG, "setup: asking vm to preparePage(...)")
                     viewModel.preparePage(newTitle)
                 } else {
-                    Log.d(TAG, "setup: asking vm to clearPage()")
                     viewModel.clearPage()
                 }
             }
@@ -155,12 +145,6 @@ class EditBookPageActivity : AppCompatActivity() {
             binding.image.visibility = View.VISIBLE
         }
 
-    }
-
-    private fun onSave() {
-        viewModel.save {
-            finish()
-        }
     }
 
     companion object {

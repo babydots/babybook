@@ -29,6 +29,9 @@ interface BookDao {
     @Query("SELECT * FROM Book WHERE id = :id")
     fun getBook(id: Long): Book
 
+    @Query("SELECT * FROM Book WHERE id = :id")
+    fun getBookLive(id: Long): LiveData<Book>
+
     @Query("SELECT * FROM BookPage WHERE id = :id")
     fun getBookPage(id: Long): BookPage
 

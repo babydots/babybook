@@ -16,11 +16,16 @@ class BookListAdapter(context: Context): RecyclerView.Adapter<BookListAdapter.Vi
 
     private var values: List<Book> = listOf()
     private var bookSelectedListener: ((book: Book) -> Unit)? = null
+    private var bookLongPressedListener: ((book: Book) -> Unit)? = null
     private var handler: Handler = Handler(context.mainLooper)
     private var dao = AppDatabase.getInstance(context).bookDao()
 
     fun setBookSelectedListener(listener: (book: Book) -> Unit) {
         this.bookSelectedListener = listener
+    }
+
+    fun setBookLongPressedListener(listener: (book: Book) -> Unit) {
+        this.bookLongPressedListener = listener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,6 +36,12 @@ class BookListAdapter(context: Context): RecyclerView.Adapter<BookListAdapter.Vi
         val book = values[position]
         holder.titleView.text = book.title
         holder.root.setOnClickListener { bookSelectedListener?.invoke(book) }
+
+        holder.root.isLongClickable = true
+        holder.root.setOnLongClickListener {
+            bookLongPressedListener?.invoke(book)
+            true
+        }
 
         AppDatabase.executor.execute {
             val coverImage = dao.getBookCoverImage(book.id)

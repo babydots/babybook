@@ -3,19 +3,30 @@ package com.serwylo.babybook.editbook
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.serwylo.babybook.R
 import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.Book
 import com.serwylo.babybook.editbookpage.EditBookPageActivity
+import com.serwylo.babybook.utils.debounce
+
 
 class EditBookActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditBookBinding
     private lateinit var viewModel: EditBookViewModel
+
     private val dao = AppDatabase.getInstance(this).bookDao()
+
+    private var bookId: Long = 0L
 
     private val addPage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
     }
@@ -26,23 +37,25 @@ class EditBookActivity : AppCompatActivity() {
         binding = ActivityEditBookBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val bookId: Long = intent.extras?.getLong(EXTRA_BOOK_ID) ?: 0L
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        bookId = intent.extras?.getLong(EXTRA_BOOK_ID) ?: 0L
         if (bookId == 0L) {
             AppDatabase.executor.execute {
-                val newBookId = dao.insert(Book("New Book"))
-                val pages = dao.getBookPages(newBookId)
+                bookId = dao.insert(Book("New Book"))
+                val pages = dao.getBookPages(bookId)
 
                 runOnUiThread {
-                    viewModel = ViewModelProvider(this, EditBookViewModelFactory(application, newBookId, "New Book", pages)).get(EditBookViewModel::class.java)
-                    setup(newBookId)
+                    viewModel = ViewModelProvider(this, EditBookViewModelFactory(application, bookId, "New Book", pages)).get(EditBookViewModel::class.java)
+                    setup(bookId)
                 }
             }
         } else {
             AppDatabase.executor.execute {
                 val book = dao.getBook(bookId)
+                val pages = dao.getBookPages(bookId)
 
                 runOnUiThread {
-                    val pages = dao.getBookPages(bookId)
                     viewModel = ViewModelProvider(this, EditBookViewModelFactory(application, bookId, book.title, pages)).get(EditBookViewModel::class.java)
                     setup(bookId)
                 }
@@ -51,9 +64,23 @@ class EditBookActivity : AppCompatActivity() {
 
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.add_page -> {
+                onAddPage(bookId)
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.edit_book_menu, menu)
+        return true
+    }
+
     private fun setup(bookId: Long) {
         viewModel.bookTitle.observe(this, { title ->
-            binding.save.isEnabled = title.isNotEmpty()
             if (binding.bookTitle.text.toString() != title) {
                 binding.bookTitle.setText(title)
             }
@@ -76,8 +103,9 @@ class EditBookActivity : AppCompatActivity() {
         }
 
         binding.bookTitle.addTextChangedListener { viewModel.bookTitle.value = it.toString() }
-        binding.addPage.setOnClickListener { onAddPage(bookId) }
-        binding.save.setOnClickListener { onSave(bookId) }
+        binding.bookTitle.doAfterTextChanged(debounce(300L, lifecycleScope) {
+            onSave(bookId, it?.toString() ?: "")
+        })
     }
 
     private fun onAddPage(bookId: Long) {
@@ -88,13 +116,11 @@ class EditBookActivity : AppCompatActivity() {
         )
     }
 
-    private fun onSave(bookId: Long) {
+    private fun onSave(bookId: Long, title: String) {
         AppDatabase.executor.execute {
-            val title = viewModel.bookTitle.value ?: ""
             val newBook = Book(if (title.isNotEmpty()) title else "New Book").apply { id = bookId }
 
             dao.update(newBook)
-            finish()
         }
     }
 

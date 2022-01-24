@@ -36,6 +36,8 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                 mainImage.value = "file://${image.absolutePath}"
             }
 
+            save()
+
             isLoadingPage.value = false
         }
     }
@@ -46,7 +48,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
         pageText.value = ""
     }
 
-    fun save(callback: () -> Unit) {
+    fun save() {
         val dao = AppDatabase.getInstance(application).bookDao()
 
         AppDatabase.executor.execute {
@@ -72,8 +74,6 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
 
                 dao.insert(page)
             }
-
-            callback()
 
         }
     }

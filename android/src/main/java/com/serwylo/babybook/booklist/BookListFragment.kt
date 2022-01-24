@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.editbook.EditBookActivity
 import com.serwylo.babybook.R
+import com.serwylo.babybook.bookviewer.BookViewerActivity
 import com.serwylo.babybook.db.AppDatabase
 
 class BookListFragment : Fragment() {
@@ -48,6 +49,12 @@ class BookListFragment : Fragment() {
                 adapter = BookListAdapter(context).also { adapter ->
 
                     adapter.setBookSelectedListener { book ->
+                        startActivity(Intent(context, BookViewerActivity::class.java).apply {
+                            putExtra(BookViewerActivity.EXTRA_BOOK_ID, book.id)
+                        })
+                    }
+
+                    adapter.setBookLongPressedListener { book ->
                         startActivity(Intent(context, EditBookActivity::class.java).apply {
                             putExtra(EditBookActivity.EXTRA_BOOK_ID, book.id)
                         })
