@@ -3,6 +3,7 @@ package com.serwylo.babybook.db.entities
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.serwylo.babybook.mediawiki.processTitle
 
 @Entity(
     foreignKeys = [ForeignKey(
@@ -13,13 +14,31 @@ import androidx.room.PrimaryKey
     )]
 )
 data class BookPage(
-    val pageNumber: Int,
-    val wikiPageTitle: String,
-    val imagePath: String?,
-    val text: String?,
-
     val bookId: Long,
+
+    val pageNumber: Int,
+
+    /**
+     * The title used to
+     */
+    val wikiPageTitle: String? = null,
+
+    /**
+     * Generally the same as wikiPageTitle.
+     *
+     * Allow overriding the page title to something more palatable.
+     * For example, we will always strip off trailing parentheses from a wikipedia title,
+     * as they are used to disambiguate titles - not useful for these pages.
+     */
+    val pageTitle: String? = null,
+
+    val imagePath: String? = null,
+
+    val text: String? = null,
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
+
+    fun title() = pageTitle ?: processTitle(wikiPageTitle ?: "")
+
 }

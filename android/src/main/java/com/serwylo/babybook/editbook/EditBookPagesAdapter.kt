@@ -27,7 +27,7 @@ class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val page = values[position]
-        holder.titleView.text = processTitle(page.wikiPageTitle)
+        holder.titleView.text = page.title()
         if (page.imagePath == null) {
             holder.imageView.visibility = View.GONE
         } else {

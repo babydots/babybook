@@ -9,12 +9,14 @@ import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.mediawiki.downloadImages
 import com.serwylo.babybook.mediawiki.loadWikiPage
+import com.serwylo.babybook.mediawiki.processTitle
 import kotlinx.coroutines.launch
 import java.io.File
 
 class EditBookPageViewModel(private val application: Application, val bookId: Long, private val existingBookPage: BookPage? = null): ViewModel() {
 
-    val pageTitle = MutableLiveData(existingBookPage?.wikiPageTitle ?: "")
+    val wikiPageTitle = MutableLiveData(existingBookPage?.wikiPageTitle ?: "")
+    val pageTitle = MutableLiveData(existingBookPage?.pageTitle ?: "")
     val pageText = MutableLiveData(existingBookPage?.text ?: "")
     val mainImage = MutableLiveData<String?>(existingBookPage?.imagePath)
     val allImages = MutableLiveData(listOf<File>())
@@ -25,6 +27,8 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
     fun preparePage(title: String) {
         viewModelScope.launch {
             isLoadingPage.value = true
+
+            pageTitle.value = processTitle(title)
 
             val details = loadWikiPage(title, application.cacheDir)
             val images = downloadImages(details.getImageNamesOfInterest(), application.cacheDir)
@@ -56,7 +60,8 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             if (existingBookPage != null) {
                 val page = BookPage(
                     pageNumber = existingBookPage.pageNumber,
-                    wikiPageTitle = pageTitle.value ?: "",
+                    wikiPageTitle = wikiPageTitle.value ?: "",
+                    pageTitle = pageTitle.value ?: "",
                     text = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value
@@ -66,7 +71,8 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             } else {
                 val page = BookPage(
                     pageNumber = dao.countPages(bookId) + 1,
-                    wikiPageTitle = pageTitle.value ?: "",
+                    wikiPageTitle = wikiPageTitle.value ?: "",
+                    pageTitle = pageTitle.value ?: "",
                     text = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value

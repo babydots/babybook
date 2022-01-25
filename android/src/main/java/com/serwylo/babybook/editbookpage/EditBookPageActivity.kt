@@ -104,6 +104,7 @@ class EditBookPageActivity : AppCompatActivity() {
 
             // TODO: Maybe move into own observer - but that may cause issues as we type but have
             //       not yet selected anything.
+
             binding.bookPageTitleText.text = processTitle(viewModel.pageTitle.value ?: "")
         }
 
@@ -120,14 +121,14 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        binding.bookPageTitle.setText(viewModel.pageTitle.value)
+        binding.bookPageTitle.setText(viewModel.wikiPageTitle.value)
 
         binding.bookPageTitle.also {
             it.setAdapter(AutocompleteAdapter())
 
             it.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
                 val newTitle = binding.bookPageTitle.text.toString()
-                viewModel.pageTitle.value = newTitle
+                viewModel.wikiPageTitle.value = newTitle
                 if (newTitle.isNotEmpty()) {
                     viewModel.preparePage(newTitle)
                 } else {

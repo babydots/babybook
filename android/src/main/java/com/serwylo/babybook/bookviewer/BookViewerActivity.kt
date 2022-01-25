@@ -61,7 +61,7 @@ class BookViewerActivity : AppCompatActivity() {
                         .into(binding.image)
                 }
 
-                binding.title.text = processTitle(page.wikiPageTitle)
+                binding.title.text = page.title()
                 binding.text.text = page.text
             }
         }

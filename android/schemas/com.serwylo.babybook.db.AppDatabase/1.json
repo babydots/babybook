@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e089407373a0bf448e94ddec604b6d97",
+    "identityHash": "a279498f5caf503d4b2cb3258abb53a1",
     "entities": [
       {
         "tableName": "Book",
@@ -32,8 +32,14 @@
       },
       {
         "tableName": "BookPage",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pageNumber` INTEGER NOT NULL, `title` TEXT NOT NULL, `imagePath` TEXT, `text` TEXT, `bookId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `Book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `pageNumber` INTEGER NOT NULL, `wikiPageTitle` TEXT, `pageTitle` TEXT, `imagePath` TEXT, `text` TEXT, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `Book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "pageNumber",
             "columnName": "pageNumber",
@@ -41,10 +47,16 @@
             "notNull": true
           },
           {
-            "fieldPath": "title",
-            "columnName": "title",
+            "fieldPath": "wikiPageTitle",
+            "columnName": "wikiPageTitle",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
+          },
+          {
+            "fieldPath": "pageTitle",
+            "columnName": "pageTitle",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "imagePath",
@@ -57,12 +69,6 @@
             "columnName": "text",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "bookId",
-            "columnName": "bookId",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
             "fieldPath": "id",
@@ -134,7 +140,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e089407373a0bf448e94ddec604b6d97')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a279498f5caf503d4b2cb3258abb53a1')"
     ]
   }
 }
