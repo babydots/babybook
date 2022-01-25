@@ -16,13 +16,17 @@ import java.io.File
 class EditBookPageViewModel(private val application: Application, val bookId: Long, private val existingBookPage: BookPage? = null): ViewModel() {
 
     val wikiPageTitle = MutableLiveData(existingBookPage?.wikiPageTitle ?: "")
-    val pageTitle = MutableLiveData(existingBookPage?.pageTitle ?: "")
-    val pageText = MutableLiveData(existingBookPage?.text ?: "")
+    val pageTitle = MutableLiveData(existingBookPage?.pageTitle)
+    val wikiPageText = MutableLiveData(existingBookPage?.wikiPageText ?: "")
+    val pageText = MutableLiveData(existingBookPage?.pageText)
     val mainImage = MutableLiveData<String?>(existingBookPage?.imagePath)
     val allImages = MutableLiveData(listOf<File>())
 
     val isSearchingPages = MutableLiveData(false)
     val isLoadingPage = MutableLiveData(false)
+
+    fun title() = pageTitle.value ?: wikiPageTitle.value ?: ""
+    fun text() = pageText.value ?: wikiPageText.value ?: ""
 
     fun preparePage(title: String) {
         viewModelScope.launch {
@@ -61,8 +65,9 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                 val page = BookPage(
                     pageNumber = existingBookPage.pageNumber,
                     wikiPageTitle = wikiPageTitle.value ?: "",
-                    pageTitle = pageTitle.value ?: "",
-                    text = pageText.value,
+                    wikiPageText = wikiPageText.value ?: "",
+                    pageTitle = pageTitle.value,
+                    pageText = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value
                 ).apply { id = existingBookPage.id }
@@ -72,8 +77,9 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                 val page = BookPage(
                     pageNumber = dao.countPages(bookId) + 1,
                     wikiPageTitle = wikiPageTitle.value ?: "",
-                    pageTitle = pageTitle.value ?: "",
-                    text = pageText.value,
+                    wikiPageText = wikiPageText.value ?: "",
+                    pageTitle = pageTitle.value,
+                    pageText = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value
                 )
@@ -82,6 +88,16 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             }
 
         }
+    }
+
+    fun manuallyUpdateTitle(title: String) {
+        pageTitle.value = title
+        save()
+    }
+
+    fun manuallyUpdateText(title: String) {
+        pageText.value = title
+        save()
     }
 
 }

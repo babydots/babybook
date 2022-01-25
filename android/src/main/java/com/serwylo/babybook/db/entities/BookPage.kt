@@ -34,11 +34,15 @@ data class BookPage(
 
     val imagePath: String? = null,
 
-    val text: String? = null,
+    val wikiPageText: String? = null,
+
+    val pageText: String? = null,
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 
     fun title() = pageTitle ?: processTitle(wikiPageTitle ?: "")
+
+    fun text() = pageText ?: wikiPageText
 
 }

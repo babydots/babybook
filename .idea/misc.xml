@@ -9,6 +9,8 @@
         <entry key="android/src/main/res/layout/activity_edit_book.xml" value="0.17477203647416414" />
         <entry key="android/src/main/res/layout/activity_edit_book_page.xml" value="0.25" />
         <entry key="android/src/main/res/layout/activity_main.xml" value="0.16927083333333334" />
+        <entry key="android/src/main/res/layout/dialog_page_text_input.xml" value="0.359375" />
+        <entry key="android/src/main/res/layout/dialog_text_input.xml" value="0.19010416666666666" />
         <entry key="android/src/main/res/layout/edit_book_page_item.xml" value="0.25" />
         <entry key="android/src/main/res/layout/fragment_book_list.xml" value="0.25" />
         <entry key="android/src/main/res/layout/fragment_book_list_list.xml" value="0.16927083333333334" />

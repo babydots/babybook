@@ -6,7 +6,6 @@ import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
-import com.serwylo.babybook.mediawiki.processTitle
 import com.squareup.picasso.Picasso
 
 class BookViewerActivity : AppCompatActivity() {
@@ -62,7 +61,7 @@ class BookViewerActivity : AppCompatActivity() {
                 }
 
                 binding.title.text = page.title()
-                binding.text.text = page.text
+                binding.text.text = page.text()
             }
         }
 

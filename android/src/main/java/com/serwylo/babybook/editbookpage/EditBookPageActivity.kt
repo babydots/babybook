@@ -9,10 +9,13 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
+import com.serwylo.babybook.databinding.DialogPageTextInputBinding
+import com.serwylo.babybook.databinding.DialogPageTitleInputBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.mediawiki.WikiSearchResults
 import com.serwylo.babybook.mediawiki.processTitle
@@ -97,16 +100,11 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.pageText.observe(this) { text ->
-            Log.d(TAG, "setup: Updating view in response to pageText being updated: ${text.substring(0, min(text.length, 30))}")
+        viewModel.pageText.observe(this) { binding.bookPageText.text = viewModel.text() }
+        viewModel.wikiPageText.observe(this) { binding.bookPageText.text = viewModel.text() }
 
-            binding.bookPageText.text = text
-
-            // TODO: Maybe move into own observer - but that may cause issues as we type but have
-            //       not yet selected anything.
-
-            binding.bookPageTitleText.text = processTitle(viewModel.pageTitle.value ?: "")
-        }
+        viewModel.pageTitle.observe(this) { binding.bookPageTitleText.text = viewModel.title() }
+        viewModel.wikiPageTitle.observe(this) { binding.bookPageTitleText.text = viewModel.title() }
 
         viewModel.mainImage.observe(this) { image ->
             if (image != null) {
@@ -121,9 +119,8 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        binding.bookPageTitle.setText(viewModel.wikiPageTitle.value)
-
         binding.bookPageTitle.also {
+            it.setText(viewModel.wikiPageTitle.value)
             it.setAdapter(AutocompleteAdapter())
 
             it.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
@@ -135,6 +132,52 @@ class EditBookPageActivity : AppCompatActivity() {
                     viewModel.clearPage()
                 }
             }
+        }
+
+        binding.bookPageTitleTextWrapper.setOnClickListener {
+            val view = DialogPageTitleInputBinding.inflate(layoutInflater, null, false)
+            view.titleInput.setText(viewModel.title())
+            if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {
+                view.originalTitle.setText(viewModel.wikiPageTitle.value ?: "")
+                view.originalTitle.setOnLongClickListener {
+                    view.titleInput.setText(viewModel.wikiPageTitle.value ?: "")
+                    true
+                }
+            } else {
+                view.originalTitle.visibility = View.GONE
+                view.originalTitleLabel.visibility = View.GONE
+            }
+            AlertDialog.Builder(this)
+                .setTitle("Edit page title")
+                .setView(view.root)
+                .setPositiveButton("Save") { _, _ ->
+                    viewModel.manuallyUpdateTitle(view.titleInput.text?.toString() ?: "")
+                }
+                .setNegativeButton("Cancel") { _, _ -> }
+                .show()
+        }
+
+        binding.bookPageTextWrapper.setOnClickListener {
+            val view = DialogPageTextInputBinding.inflate(layoutInflater, null, false)
+            view.textInput.setText(viewModel.text())
+            if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {
+                view.originalText.setText(viewModel.wikiPageText.value ?: "")
+                view.originalText.setOnLongClickListener {
+                    view.textInput.setText(viewModel.wikiPageText.value ?: "")
+                    true
+                }
+            } else {
+                view.originalText.visibility = View.GONE
+                view.originalTextLabel.visibility = View.GONE
+            }
+            AlertDialog.Builder(this)
+                // .setTitle("Edit page text")
+                .setView(view.root)
+                .setPositiveButton("Save") { _, _ ->
+                    viewModel.manuallyUpdateText(view.textInput.text?.toString() ?: "")
+                }
+                .setNegativeButton("Cancel") { _, _ -> }
+                .show()
         }
 
         viewModel.mainImage.value?.also { image ->
