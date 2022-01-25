@@ -93,6 +93,9 @@ dependencies {
     def activity_version = "1.4.0"
     implementation("androidx.activity:activity-ktx:$activity_version")
 
+    def fragment_version = "1.4.0"
+    implementation("androidx.fragment:fragment-ktx:$fragment_version")
+
     implementation 'com.squareup.picasso:picasso:2.8'
 
 }

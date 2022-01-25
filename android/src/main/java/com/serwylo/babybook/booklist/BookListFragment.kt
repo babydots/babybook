@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,19 +14,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.editbook.EditBookActivity
 import com.serwylo.babybook.R
 import com.serwylo.babybook.bookviewer.BookViewerActivity
+import com.serwylo.babybook.databinding.FragmentBookListListBinding
 import com.serwylo.babybook.db.AppDatabase
 
 class BookListFragment : Fragment() {
 
     private var columnCount = 2
 
-    private lateinit var viewModel: BookListViewModel
-
+    private val viewModel: BookListViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this).get(BookListViewModel::class.java)
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT, 2)
@@ -35,40 +34,44 @@ class BookListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_book_list_list, container, false)
+    ): View {
+        val binding = FragmentBookListListBinding.inflate(inflater, container, false)
+
+        viewModel.isInEditMode.observe(this) { isInEditMode ->
+            binding.editMode.visibility = if (isInEditMode) View.VISIBLE else View.GONE
+        }
 
         // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = when {
-                    columnCount <= 1 -> LinearLayoutManager(context)
-                    else -> GridLayoutManager(context, columnCount)
-                }
+        binding.list.apply {
+            layoutManager = when {
+                columnCount <= 1 -> LinearLayoutManager(context)
+                else -> GridLayoutManager(context, columnCount)
+            }
 
-                adapter = BookListAdapter(context).also { adapter ->
+            adapter = BookListAdapter(context).also { adapter ->
 
-                    adapter.setBookSelectedListener { book ->
+                adapter.setBookSelectedListener { book ->
+
+                    if (viewModel.isInEditMode.value == true) {
+                        startActivity(Intent(context, EditBookActivity::class.java).apply {
+                            putExtra(EditBookActivity.EXTRA_BOOK_ID, book.id)
+                        })
+                    } else {
                         startActivity(Intent(context, BookViewerActivity::class.java).apply {
                             putExtra(BookViewerActivity.EXTRA_BOOK_ID, book.id)
                         })
                     }
 
-                    adapter.setBookLongPressedListener { book ->
-                        startActivity(Intent(context, EditBookActivity::class.java).apply {
-                            putExtra(EditBookActivity.EXTRA_BOOK_ID, book.id)
-                        })
-                    }
-
-                    viewModel.allBooks.observe(viewLifecycleOwner) { books ->
-                        adapter.setData(books)
-                        adapter.notifyDataSetChanged()
-                    }
-
                 }
+
+                viewModel.allBooks.observe(viewLifecycleOwner) { books ->
+                    adapter.setData(books)
+                    adapter.notifyDataSetChanged()
+                }
+
             }
         }
-        return view
+        return binding.root
     }
 
     companion object {

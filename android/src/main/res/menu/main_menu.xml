@@ -5,6 +5,19 @@
     <item
         android:id="@+id/add"
         android:icon="@drawable/ic_add"
-        android:title="Item"
+        android:title="New book"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/edit"
+        android:icon="@drawable/ic_edit"
+        android:title="Edit books"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/cancel_edit"
+        android:icon="@drawable/ic_cross"
+        android:title="Stop editing"
+        app:showAsAction="ifRoom"
+        android:visible="false" />
 </menu>
