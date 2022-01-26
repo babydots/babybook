@@ -16,22 +16,36 @@ class BookViewerViewModel(
 
     private fun currentPageIndex() = pages.value?.indexOfFirst { it.id == currentPage.value?.id } ?: -1
 
-    fun nextPage() {
+    fun nextPage(): BookPage? {
         val index = currentPageIndex()
-        val pages = pages.value ?: return
+        val pages = pages.value ?: return null
 
-        if (index < pages.size - 1) {
-            currentPage.value = pages[index + 1]
+        return if (index < pages.size - 1) {
+            pages[index + 1]
+        } else {
+            null
         }
     }
 
-    fun previousPage() {
-        val index = currentPageIndex()
-        val pages = pages.value ?: return
+    fun turnToNextPage() {
+        val next = nextPage() ?: return
+        currentPage.value = next
+    }
 
-        if (index > 0 && pages.isNotEmpty()) {
-            currentPage.value = pages[index - 1]
+    fun previousPage(): BookPage? {
+        val index = currentPageIndex()
+        val pages = pages.value ?: return null
+
+        return if (index > 0 && pages.isNotEmpty()) {
+            pages[index - 1]
+        } else {
+            null
         }
+    }
+
+    fun turnToPreviousPage() {
+        val previous = previousPage() ?: return
+        currentPage.value = previous
     }
 
 }

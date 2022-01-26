@@ -5,14 +5,25 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.BookPage
 
 class EditBookViewModel(
     private val application: Application,
-    bookId: Long,
+    private val bookId: Long,
     title: String,
     val pages: LiveData<List<BookPage>>,
 ) : ViewModel() {
+
+    private val dao = AppDatabase.getInstance(application).bookDao()
+
+    fun deleteBook(callback: () -> Unit) {
+        AppDatabase.executor.execute {
+            val book = dao.getBook(bookId)
+            dao.delete(book)
+            callback()
+        }
+    }
 
     var bookTitle: MutableLiveData<String> = MutableLiveData(title)
 

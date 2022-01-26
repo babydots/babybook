@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.serwylo.babybook.databinding.FragmentBookListBinding
+import com.serwylo.babybook.databinding.FragmentBookListItemBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.Book
 import com.squareup.picasso.Picasso
@@ -24,12 +25,8 @@ class BookListAdapter(context: Context): RecyclerView.Adapter<BookListAdapter.Vi
         this.bookSelectedListener = listener
     }
 
-    fun setBookLongPressedListener(listener: (book: Book) -> Unit) {
-        this.bookLongPressedListener = listener
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(FragmentBookListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        return ViewHolder(FragmentBookListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -67,7 +64,7 @@ class BookListAdapter(context: Context): RecyclerView.Adapter<BookListAdapter.Vi
         values = books ?: listOf()
     }
 
-    inner class ViewHolder(binding: FragmentBookListBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(binding: FragmentBookListItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val root = binding.root
         val titleView = binding.title
         val imageView  = binding.image

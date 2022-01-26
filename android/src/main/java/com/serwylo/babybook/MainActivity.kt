@@ -51,9 +51,11 @@ class MainActivity : AppCompatActivity() {
 
         if (viewModel.isInEditMode.value == true) {
             menu.findItem(R.id.cancel_edit).isVisible = true
+            menu.findItem(R.id.add).isVisible = true
             menu.findItem(R.id.edit).isVisible = false
         } else {
             menu.findItem(R.id.cancel_edit).isVisible = false
+            menu.findItem(R.id.add).isVisible = false
             menu.findItem(R.id.edit).isVisible = true
         }
 

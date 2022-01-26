@@ -1,10 +1,7 @@
 package com.serwylo.babybook.db.daos
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.serwylo.babybook.db.entities.Book
 import com.serwylo.babybook.db.entities.BookPage
 
@@ -43,5 +40,8 @@ interface BookDao {
 
     @Update
     fun update(bookPage: BookPage)
+
+    @Delete(entity = Book::class)
+    fun delete(book: Book)
 
 }

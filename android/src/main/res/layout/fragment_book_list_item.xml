@@ -9,7 +9,7 @@
     android:clickable="true"
     android:focusable="true">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <androidx.constraintlayout.utils.widget.ImageFilterView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -24,19 +24,19 @@
 
     <TextView
         android:id="@+id/title"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="Horse"
+        tools:text="Some Long Text Goes In Here And Wraps"
+        android:textAlignment="center"
         android:textSize="22sp"
-        android:padding="4dp"
+        android:padding="18dp"
         android:background="#88ffffff"
+        android:shadowColor="@color/black"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintWidth_max="wrap"
-         />
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

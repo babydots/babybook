@@ -44,10 +44,13 @@ class BookViewerActivity : AppCompatActivity() {
 
         supportActionBar?.title = viewModel.book.title
 
-        binding.previous.setOnClickListener { viewModel.previousPage() }
-        binding.next.setOnClickListener { viewModel.nextPage() }
+        binding.previous.setOnClickListener { viewModel.turnToPreviousPage() }
+        binding.next.setOnClickListener { viewModel.turnToNextPage() }
 
         viewModel.currentPage.observe(this) {
+            binding.previous.visibility = if (viewModel.previousPage() == null) View.GONE else View.VISIBLE
+            binding.next.visibility = if (viewModel.nextPage() == null) View.GONE else View.VISIBLE
+
             it?.also { page ->
                 if (page.imagePath == null) {
                     binding.image.visibility = View.GONE

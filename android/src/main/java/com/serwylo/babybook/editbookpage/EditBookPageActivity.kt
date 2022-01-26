@@ -134,7 +134,7 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        binding.bookPageTitleTextWrapper.setOnClickListener {
+        binding.bookPageTitleText.setOnClickListener {
             val view = DialogPageTitleInputBinding.inflate(layoutInflater, null, false)
             view.titleInput.setText(viewModel.title())
             if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {
@@ -157,7 +157,7 @@ class EditBookPageActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.bookPageTextWrapper.setOnClickListener {
+        binding.bookPageText.setOnClickListener {
             val view = DialogPageTextInputBinding.inflate(layoutInflater, null, false)
             view.textInput.setText(viewModel.text())
             if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {

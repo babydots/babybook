@@ -37,7 +37,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             val details = loadWikiPage(title, application.cacheDir)
             val images = downloadImages(details.getImageNamesOfInterest(), application.cacheDir)
 
-            pageText.value = details.parseParagraphs().firstOrNull() ?: ""
+            wikiPageText.value = details.parseParagraphs().firstOrNull() ?: ""
             allImages.value = images
 
             images.firstOrNull()?.also { image ->

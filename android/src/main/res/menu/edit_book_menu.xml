@@ -7,4 +7,11 @@
         android:title="Add Page"
         android:icon="@drawable/ic_add_page"
         app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/delete_book"
+        android:title="Delete book"
+        android:icon="@drawable/ic_delete"
+        app:showAsAction="ifRoom"/>
+
 </menu>

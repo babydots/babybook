@@ -11,6 +11,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.serwylo.babybook.R
 import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
@@ -67,7 +68,12 @@ class EditBookActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.add_page -> {
-                onAddPage(bookId)
+                onAddPage()
+                return true
+            }
+
+            R.id.delete_book -> {
+                onDeleteBook()
                 return true
             }
         }
@@ -108,7 +114,19 @@ class EditBookActivity : AppCompatActivity() {
         })
     }
 
-    private fun onAddPage(bookId: Long) {
+    private fun onDeleteBook() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Delete book?")
+            .setMessage("Are you sure you want to remove this book? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteBook {
+                    finish()
+                }
+            }
+            .show()
+    }
+
+    private fun onAddPage() {
         addPage.launch(
             Intent(this, EditBookPageActivity::class.java).apply {
                 putExtra(EditBookPageActivity.EXTRA_BOOK_ID, bookId)

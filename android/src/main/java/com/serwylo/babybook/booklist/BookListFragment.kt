@@ -7,15 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.editbook.EditBookActivity
-import com.serwylo.babybook.R
 import com.serwylo.babybook.bookviewer.BookViewerActivity
-import com.serwylo.babybook.databinding.FragmentBookListListBinding
-import com.serwylo.babybook.db.AppDatabase
+import com.serwylo.babybook.databinding.FragmentBookListBinding
 
 class BookListFragment : Fragment() {
 
@@ -35,7 +31,7 @@ class BookListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentBookListListBinding.inflate(inflater, container, false)
+        val binding = FragmentBookListBinding.inflate(inflater, container, false)
 
         viewModel.isInEditMode.observe(this) { isInEditMode ->
             binding.editMode.visibility = if (isInEditMode) View.VISIBLE else View.GONE
