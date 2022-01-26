@@ -35,6 +35,11 @@ class BookListFragment : Fragment() {
 
         viewModel.isInEditMode.observe(this) { isInEditMode ->
             binding.editMode.visibility = if (isInEditMode) View.VISIBLE else View.GONE
+            binding.addBookButton.visibility = if (isInEditMode) View.VISIBLE else View.GONE
+        }
+
+        binding.addBookButton.setOnClickListener {
+            onAddBook()
         }
 
         // Set the adapter
@@ -68,6 +73,10 @@ class BookListFragment : Fragment() {
             }
         }
         return binding.root
+    }
+
+    private fun onAddBook() {
+        startActivity(Intent(context, EditBookActivity::class.java))
     }
 
     companion object {

@@ -30,10 +30,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.add -> {
-                onAddBook()
-                return true
-            }
             R.id.edit -> {
                 viewModel.toggleEditMode()
                 return true
@@ -51,19 +47,13 @@ class MainActivity : AppCompatActivity() {
 
         if (viewModel.isInEditMode.value == true) {
             menu.findItem(R.id.cancel_edit).isVisible = true
-            menu.findItem(R.id.add).isVisible = true
             menu.findItem(R.id.edit).isVisible = false
         } else {
             menu.findItem(R.id.cancel_edit).isVisible = false
-            menu.findItem(R.id.add).isVisible = false
             menu.findItem(R.id.edit).isVisible = true
         }
 
         return true
-    }
-
-    private fun onAddBook() {
-        startActivity(Intent(this, EditBookActivity::class.java))
     }
 
 }

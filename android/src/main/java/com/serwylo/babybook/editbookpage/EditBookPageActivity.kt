@@ -151,17 +151,11 @@ class EditBookPageActivity : AppCompatActivity() {
             val view = DialogPageTitleInputBinding.inflate(layoutInflater, null, false)
             view.titleInput.setText(viewModel.title())
             if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {
-                view.originalTitle.setText(viewModel.wikiPageTitle.value ?: "")
-                view.originalTitle.setOnLongClickListener {
-                    view.titleInput.setText(viewModel.wikiPageTitle.value ?: "")
-                    true
-                }
+                view.originalTitle.text = "Original title on Wikipedia: ${viewModel.wikiPageTitle.value ?: "Unknown"}"
             } else {
                 view.originalTitle.visibility = View.GONE
-                view.originalTitleLabel.visibility = View.GONE
             }
             AlertDialog.Builder(this)
-                .setTitle("Edit page title")
                 .setView(view.root)
                 .setPositiveButton("Save") { _, _ ->
                     viewModel.manuallyUpdateTitle(view.titleInput.text?.toString() ?: "")
@@ -184,7 +178,6 @@ class EditBookPageActivity : AppCompatActivity() {
                 view.originalTextLabel.visibility = View.GONE
             }
             AlertDialog.Builder(this)
-                // .setTitle("Edit page text")
                 .setView(view.root)
                 .setPositiveButton("Save") { _, _ ->
                     viewModel.manuallyUpdateText(view.textInput.text?.toString() ?: "")

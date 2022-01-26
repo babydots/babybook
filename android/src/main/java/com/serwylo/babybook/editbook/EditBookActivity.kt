@@ -115,15 +115,18 @@ class EditBookActivity : AppCompatActivity() {
     }
 
     private fun onDeleteBook() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Delete book?")
-            .setMessage("Are you sure you want to remove this book? This action cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                viewModel.deleteBook {
-                    finish()
+        if (viewModel.pages.value.isNullOrEmpty()) {
+            viewModel.deleteBook { finish() }
+        } else {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Delete book?")
+                .setMessage("Are you sure you want to remove this book? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.deleteBook { finish() }
                 }
-            }
-            .show()
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 
     private fun onAddPage() {
