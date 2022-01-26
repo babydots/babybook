@@ -1,11 +1,15 @@
 package com.serwylo.babybook.editbookpage
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -13,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.serwylo.babybook.R
 import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
 import com.serwylo.babybook.databinding.DialogPageTextInputBinding
 import com.serwylo.babybook.databinding.DialogPageTitleInputBinding
@@ -67,6 +72,8 @@ class EditBookPageActivity : AppCompatActivity() {
 
     private fun setup() {
 
+        invalidateOptionsMenu()
+
         viewModel.isSearchingPages.observe(this) { isSearching ->
             if (isSearching) {
                 Log.d(TAG, "setup: Updating view in response to vm.isSearchingPages")
@@ -104,7 +111,13 @@ class EditBookPageActivity : AppCompatActivity() {
         viewModel.wikiPageText.observe(this) { binding.bookPageText.text = viewModel.text() }
 
         viewModel.pageTitle.observe(this) { binding.bookPageTitleText.text = viewModel.title() }
-        viewModel.wikiPageTitle.observe(this) { binding.bookPageTitleText.text = viewModel.title() }
+        viewModel.wikiPageTitle.observe(this) {
+            binding.bookPageTitleText.text = viewModel.title()
+
+            // The first time we add a new page, there is no "view in wiki" link in the menu.
+            // Once we get a page title sorted out, we can then show this menu option.
+            invalidateOptionsMenu()
+        }
 
         viewModel.mainImage.observe(this) { image ->
             if (image != null) {
@@ -189,6 +202,38 @@ class EditBookPageActivity : AppCompatActivity() {
             binding.image.visibility = View.VISIBLE
         }
 
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.view_in_wikipedia -> {
+                onViewInWikipedia()
+                return true
+            }
+
+            R.id.delete_page -> {
+                // viewModel.delete()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.edit_book_page_menu, menu)
+
+        val exists = viewModel.wikiPageTitle.value?.isNotEmpty() == true
+        menu.findItem(R.id.view_in_wikipedia).isVisible = exists
+        menu.findItem(R.id.delete_page).isVisible = exists
+
+        return true
+    }
+
+    private fun onViewInWikipedia() {
+        viewModel.wikiPageTitle.value?.also { title ->
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://simple.wikipedia.org/wiki/$title"));
+            startActivity(intent)
+        }
     }
 
     companion object {

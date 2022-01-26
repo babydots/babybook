@@ -16,6 +16,7 @@
         <entry key="android/src/main/res/layout/fragment_book_list.xml" value="0.25" />
         <entry key="android/src/main/res/layout/fragment_book_list_list.xml" value="0.16927083333333334" />
         <entry key="android/src/main/res/menu/edit_book_menu.xml" value="0.35885416666666664" />
+        <entry key="android/src/main/res/menu/edit_book_page_menu.xml" value="0.18958333333333333" />
         <entry key="android/src/main/res/menu/main_menu.xml" value="0.35384615384615387" />
       </map>
     </option>
