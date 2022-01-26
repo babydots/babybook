@@ -42,36 +42,34 @@ class BookListFragment : Fragment() {
             onAddBook()
         }
 
-        // Set the adapter
-        binding.list.apply {
-            layoutManager = when {
-                columnCount <= 1 -> LinearLayoutManager(context)
-                else -> GridLayoutManager(context, columnCount)
-            }
-
-            adapter = BookListAdapter(context).also { adapter ->
-
-                adapter.setBookSelectedListener { book ->
-
-                    if (viewModel.isInEditMode.value == true) {
-                        startActivity(Intent(context, EditBookActivity::class.java).apply {
-                            putExtra(EditBookActivity.EXTRA_BOOK_ID, book.id)
-                        })
-                    } else {
-                        startActivity(Intent(context, BookViewerActivity::class.java).apply {
-                            putExtra(BookViewerActivity.EXTRA_BOOK_ID, book.id)
-                        })
-                    }
-
-                }
-
-                viewModel.allBooks.observe(viewLifecycleOwner) { books ->
-                    adapter.setData(books)
-                    adapter.notifyDataSetChanged()
-                }
-
-            }
+        binding.list.layoutManager = when {
+            columnCount <= 1 -> LinearLayoutManager(context)
+            else -> GridLayoutManager(context, columnCount)
         }
+
+        binding.list.adapter = BookListAdapter(context!!).also { adapter ->
+
+            adapter.setBookSelectedListener { book ->
+
+                if (viewModel.isInEditMode.value == true) {
+                    startActivity(Intent(context, EditBookActivity::class.java).apply {
+                        putExtra(EditBookActivity.EXTRA_BOOK_ID, book.id)
+                    })
+                } else {
+                    startActivity(Intent(context, BookViewerActivity::class.java).apply {
+                        putExtra(BookViewerActivity.EXTRA_BOOK_ID, book.id)
+                    })
+                }
+
+            }
+
+            viewModel.allBooks.observe(viewLifecycleOwner) { books ->
+                adapter.setData(books)
+                adapter.notifyDataSetChanged()
+            }
+
+        }
+
         return binding.root
     }
 
