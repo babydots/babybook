@@ -96,8 +96,12 @@ dependencies {
     def fragment_version = "1.4.0"
     implementation("androidx.fragment:fragment-ktx:$fragment_version")
 
+    implementation("androidx.viewpager2:viewpager2:1.1.0-beta01")
+
     implementation 'com.squareup.picasso:picasso:2.8'
 
-    implementation 'uk.co.samuelwall:material-tap-target-prompt:3.3.1'
+    implementation 'com.tbuonomo:dotsindicator:4.2'
+
+    implementation 'androidx.preference:preference-ktx:1.2.0'
 
 }

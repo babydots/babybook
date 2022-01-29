@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="6.5801787mm"
+   height="5.9880481mm"
+   viewBox="0 0 6.5801787 5.9880481"
+   version="1.1"
+   id="svg11083"
+   inkscape:version="1.1.1 (c3084ef, 2021-09-22)"
+   sodipodi:docname="onboarding_book.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview11085"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="3.079497"
+     inkscape:cx="-20.457887"
+     inkscape:cy="-5.3580179"
+     inkscape:window-width="1312"
+     inkscape:window-height="969"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs11080">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3489-4-5">
+      <rect
+         style="opacity:1;fill:#ff5555;fill-opacity:1;stroke:none;stroke-width:1.85633;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3491-9-3"
+         width="24.613001"
+         height="24.613001"
+         x="-400.11328"
+         y="406.96249"
+         transform="matrix(0.93859553,-0.34501946,0.93859554,0.34501945,0,0)" />
+    </clipPath>
+    <mask
+       maskUnits="userSpaceOnUse"
+       id="mask4940">
+      <path
+         d="m 39.976747,282.30542 -3.071804,0.0576 c -10.890085,0.21202 -18.076209,0.35326 -22.250108,-1.18103 -3.40095,-1.25016 -3.378964,-3.22277 0.04997,-4.48322 1.937118,-0.71207 4.690711,-1.06672 7.317578,-0.99324 -0.199899,-0.96561 0.764894,-1.97781 2.702013,-2.68987 3.42893,-1.26045 8.795259,-1.26853 12.196208,-0.0184 4.1739,1.53429 3.789666,4.17585 3.223908,8.183 z"
+         id="path4942"
+         style="fill:#ffffff;stroke-width:0.95066" />
+    </mask>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-138.80727,-187.01988)">
+    <g
+       id="g3425-9-4"
+       transform="matrix(0.1477642,0.14776421,-0.40197971,0.4019797,249.67126,73.619751)"
+       clip-path="url(#clipPath3489-4-5)"
+       mask="url(#mask4940)"
+       inkscape:export-filename="/Users/m_peter/code/babybook/assets/onboarding_book.png"
+       inkscape:export-xdpi="2316.05"
+       inkscape:export-ydpi="2316.05">
+      <rect
+         y="264.8577"
+         x="13.189155"
+         height="25.759457"
+         width="3.5506287"
+         id="rect3398-7-3"
+         style="opacity:1;fill:#ff2ad4;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         style="opacity:1;fill:#9955ff;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3400-27-9"
+         width="3.5506287"
+         height="25.759457"
+         x="16.739784"
+         y="264.8577" />
+      <rect
+         y="264.8577"
+         x="20.290413"
+         height="25.759457"
+         width="3.5506287"
+         id="rect3402-3-1"
+         style="opacity:1;fill:#2a7fff;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         style="opacity:1;fill:#00ccff;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3404-1-3"
+         width="3.5506287"
+         height="25.759457"
+         x="23.841042"
+         y="264.8577" />
+      <rect
+         y="264.8577"
+         x="27.39167"
+         height="25.759457"
+         width="3.5506287"
+         id="rect3406-2-6"
+         style="opacity:1;fill:#00ffcc;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         style="opacity:1;fill:#00d400;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3408-8-7"
+         width="3.5506287"
+         height="25.759457"
+         x="30.942299"
+         y="264.8577" />
+      <rect
+         y="264.8577"
+         x="34.492928"
+         height="25.759457"
+         id="rect3410-6-5"
+         style="opacity:1;fill:#ffcc00;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         width="3.5506287" />
+      <rect
+         style="opacity:1;fill:#ff7f2a;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3412-5-0"
+         width="3.5506287"
+         height="25.759457"
+         x="38.043556"
+         y="264.8577" />
+      <rect
+         y="264.8577"
+         x="41.594185"
+         height="25.759457"
+         width="3.5506287"
+         id="rect3414-3-3"
+         style="opacity:1;fill:#ff5555;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         y="264.8577"
+         x="45.144814"
+         height="25.759457"
+         width="3.5506284"
+         id="rect3398-6-2-6"
+         style="opacity:1;fill:#ff2ad4;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         style="opacity:1;fill:#9955ff;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3400-2-5-4"
+         width="3.5506284"
+         height="25.759457"
+         x="48.695442"
+         y="264.8577" />
+      <rect
+         y="264.8577"
+         x="9.638526"
+         height="25.759457"
+         width="3.5506284"
+         id="rect3414-6-6-4"
+         style="opacity:1;fill:#ff5555;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         style="opacity:1;fill:#ff7f2a;fill-opacity:1;stroke:none;stroke-width:1.97702;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect3412-1-6-3"
+         width="3.5506284"
+         height="25.759457"
+         x="6.0878973"
+         y="264.8577" />
+    </g>
+    <g
+       style="fill:#000000"
+       id="g2324"
+       transform="matrix(0.10837057,-0.05670873,0.05670873,0.10837057,139.95089,188.71805)"
+       inkscape:export-filename="/Users/m_peter/code/babybook/assets/onboarding_book.png"
+       inkscape:export-xdpi="2316.05"
+       inkscape:export-ydpi="2316.05">
+      <g
+         id="g2290">
+        <rect
+           fill="none"
+           height="24"
+           width="24"
+           id="rect2288"
+           x="0"
+           y="0" />
+      </g>
+      <g
+         id="g2306-1"
+         transform="matrix(1.1725869,0.21336693,-0.21336693,1.1725869,-0.8157494,-5.0583744)"
+         style="fill:#ffffff">
+        <g
+           id="g2292-2"
+           style="fill:#ffffff" />
+        <g
+           id="g2304-7"
+           style="fill:#ffffff">
+          <path
+             d="M 21,5 C 19.89,4.65 18.67,4.5 17.5,4.5 15.55,4.5 13.408702,4.9413279 11.958611,5.7934515 10.219468,4.817496 8.45,4.5 6.5,4.5 4.55,4.5 2.45,4.9 1,6 V 20.65 C 0.9014389,21.6367 1.1885063,22.159461 1.7503335,22.007502 3.4515957,21.06989 5.4333949,20.229891 6.8833949,20.229891 8.8333949,20.229891 10.55,20.4 12,21.5 c 1.35,-0.85 3.800072,-1.304668 5.500072,-1.304668 1.65,0 3.350261,1.01217 4.750261,1.76217 0.1,0.05 0.15,0.05 0.25,0.05 C 22.750333,22.007502 23,20.85 23,20.6 V 6 C 22.4,5.55 21.75,5.25 21,5 Z"
+             id="path2294-4"
+             style="fill:#ffffff"
+             sodipodi:nodetypes="cscscccscscsscc" />
+          <g
+             id="g2302-1"
+             style="fill:#ffffff" />
+        </g>
+      </g>
+      <g
+         id="g2306"
+         transform="rotate(10.312855,12.814175,4.4882482)">
+        <g
+           id="g2292" />
+        <g
+           id="g2304">
+          <path
+             d="M 21,5 C 19.89,4.65 18.67,4.5 17.5,4.5 15.55,4.5 13.45,4.9 12,6 10.55,4.9 8.45,4.5 6.5,4.5 4.55,4.5 2.45,4.9 1,6 v 14.65 c 0,0.25 0.25,0.5 0.5,0.5 0.1,0 0.15,-0.05 0.25,-0.05 C 3.1,20.45 5.05,20 6.5,20 c 1.95,0 4.05,0.4 5.5,1.5 1.35,-0.85 3.8,-1.5 5.5,-1.5 1.65,0 3.35,0.3 4.75,1.05 0.1,0.05 0.15,0.05 0.25,0.05 0.25,0 0.5,-0.25 0.5,-0.5 V 6 C 22.4,5.55 21.75,5.25 21,5 Z m 0,13.5 C 19.9,18.15 18.7,18 17.5,18 15.8,18 13.35,18.65 12,19.5 V 8 c 1.35,-0.85 3.8,-1.5 5.5,-1.5 1.2,0 2.4,0.15 3.5,0.5 z"
+             id="path2294" />
+          <g
+             id="g2302">
+            <path
+               d="m 17.5,10.5 c 0.88,0 1.73,0.09 2.5,0.26 V 9.24 C 19.21,9.09 18.36,9 17.5,9 15.8,9 14.26,9.29 13,9.83 v 1.66 c 1.13,-0.64 2.7,-0.99 4.5,-0.99 z"
+               id="path2296" />
+            <path
+               d="m 13,12.49 v 1.66 c 1.13,-0.64 2.7,-0.99 4.5,-0.99 0.88,0 1.73,0.09 2.5,0.26 V 11.9 c -0.79,-0.15 -1.64,-0.24 -2.5,-0.24 -1.7,0 -3.24,0.3 -4.5,0.83 z"
+               id="path2298" />
+            <path
+               d="m 17.5,14.33 c -1.7,0 -3.24,0.29 -4.5,0.83 v 1.66 c 1.13,-0.64 2.7,-0.99 4.5,-0.99 0.88,0 1.73,0.09 2.5,0.26 v -1.52 c -0.79,-0.16 -1.64,-0.24 -2.5,-0.24 z"
+               id="path2300" />
+          </g>
+        </g>
+      </g>
+    </g>
+    <g
+       id="g10164"
+       transform="matrix(0.51104621,0.34884895,-0.34279662,0.50217988,265.28453,73.637923)"
+       inkscape:export-filename="/Users/m_peter/code/babybook/assets/onboarding_book.png"
+       inkscape:export-xdpi="2316.05"
+       inkscape:export-ydpi="2316.05">
+      <g
+         style="fill:#ffffff"
+         id="g2286-1"
+         transform="matrix(0.13215124,-0.1343058,0.13197566,0.13448446,-59.909837,271.02716)">
+        <path
+           d="M 2.9989238,15.631072 3,21 8.3689278,20.998924 18.620002,10.748926 13.249998,5.3810741 Z M 21.520002,7.8489259 C 21.909854,7.4587781 21.1,6.02 20.71,5.63 L 18.37,3.29 C 17.98,2.9 16.539876,2.0909524 16.149998,2.4810741 l -3.447852,3.450004 c 0,0 2.606805,8.0343779 4.561079,6.1778539 z"
+           id="path2276-2"
+           style="fill:#ffffff"
+           sodipodi:nodetypes="ccccccssssccs" />
+      </g>
+      <g
+         style="fill:#000000"
+         id="g2286"
+         transform="matrix(0.11224065,-0.11407058,0.11209152,0.11422233,-59.443451,271.03726)">
+        <path
+           d="M 3,17.25 V 21 H 6.75 L 17.81,9.94 14.06,6.19 Z M 20.71,7.04 c 0.39,-0.39 0.39,-1.02 0,-1.41 L 18.37,3.29 C 17.98,2.9 17.35,2.9 16.96,3.29 l -1.83,1.83 3.75,3.75 z"
+           id="path2276" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import com.serwylo.babybook.booklist.BookListViewModel
 import com.serwylo.babybook.databinding.ActivityMainBinding
 import com.serwylo.babybook.editbook.EditBookActivity
+import com.serwylo.babybook.onboarding.OnboardingActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,6 +19,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!Preferences.isOnboardingComplete(this)) {
+            Preferences.setOnboardingComplete(this)
+            startActivity(Intent(this, OnboardingActivity::class.java))
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
