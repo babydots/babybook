@@ -2,13 +2,12 @@ package com.serwylo.babybook.booklist
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.serwylo.babybook.R
 import com.serwylo.babybook.editbook.EditBookActivity
 import com.serwylo.babybook.bookviewer.BookViewerActivity
 import com.serwylo.babybook.databinding.FragmentBookListBinding

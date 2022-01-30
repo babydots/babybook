@@ -34,8 +34,13 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
 
             pageTitle.value = processTitle(title)
 
-            val details = loadWikiPage(title, application.cacheDir)
-            val images = downloadImages(details.getImageNamesOfInterest(), application.cacheDir)
+            val dir = File(application.filesDir, title)
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+
+            val details = loadWikiPage(title, dir)
+            val images = downloadImages(details.getImageNamesOfInterest(), dir)
 
             wikiPageText.value = details.parseParagraphs().firstOrNull() ?: ""
             allImages.value = images
@@ -84,7 +89,8 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                     imagePath = mainImage.value
                 )
 
-                dao.insert(page)
+                val id = dao.insert(page)
+                println(id)
             }
 
         }

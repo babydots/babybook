@@ -32,7 +32,8 @@ fun generatePdf(bookTitle: String, pages: List<Page>, outputFile: File, config: 
         println("Writing page: ${page.title}")
         document.newPage()
 
-        val image: Image = Image.getInstance(scaleImage(page.image).absolutePath)
+        // val image: Image = Image.getInstance(scaleImage(page.image).absolutePath)
+        val image: Image = Image.getInstance(page.image.absolutePath)
         val xScaleRequired = document.pageSize.width / image.width
         val yScaleRequired = document.pageSize.height / image.height
         val scale = xScaleRequired.coerceAtLeast(yScaleRequired)

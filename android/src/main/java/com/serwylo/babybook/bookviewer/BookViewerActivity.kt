@@ -1,12 +1,27 @@
 package com.serwylo.babybook.bookviewer
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.DocumentsContract
+import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.serwylo.babybook.R
+import com.serwylo.babybook.book.BookConfig
+import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
+import com.serwylo.babybook.pdf.generatePdf
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.*
 
 class BookViewerActivity : AppCompatActivity() {
 
@@ -38,6 +53,83 @@ class BookViewerActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.view_book_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.share -> {
+                share()
+                return true
+            }
+            R.id.pdf -> {
+                startPdfExport()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun share() {
+
+    }
+
+    private fun startPdfExport() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_TITLE, "${viewModel.book.title}.pdf")
+
+            // Optionally, specify a URI for the directory that should be opened in
+            // the system file picker before your app creates the document.
+            // putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+        startActivityForResult(intent, RESULT_CREATE_FILE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
+        super.onActivityResult(requestCode, resultCode, resultData)
+
+        if (requestCode == RESULT_CREATE_FILE && resultCode == RESULT_OK) {
+            val uri = resultData?.data ?: return
+            try {
+                lifecycleScope.launchWhenCreated {
+                    withContext(Dispatchers.IO) {
+                        contentResolver.openFileDescriptor(uri, "w")?.use {
+                            FileOutputStream(it.fileDescriptor).use { outputStream ->
+                                exportPdf(outputStream)
+                            }
+                        }
+                    }
+
+                    Toast.makeText(this@BookViewerActivity, "PDF successfully created.", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: IOException) {
+                Toast.makeText(this, "Uh oh. Something went wrong making your PDF. It may not have saved correctly.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private suspend fun exportPdf(outputStream: OutputStream) {
+        val pages = viewModel.pages.value?.map {
+            val file = it.imageFile(this)
+
+            if (file == null) null else Page(
+                it.title(),
+                file,
+                it.text() ?: "",
+            )
+        } ?: listOf()
+
+        val pdfFile = File(cacheDir, "${viewModel.book.title}.pdf")
+
+        generatePdf(viewModel.book.title, pages.filterNotNull(), pdfFile, BookConfig.Default)
+
+        pdfFile.inputStream().use { it.copyTo(outputStream) }
     }
 
     private fun setup(binding: ActivityBookViewerBinding) {
@@ -78,7 +170,13 @@ class BookViewerActivity : AppCompatActivity() {
     }
 
     companion object {
+
+        private const val TAG = "BookViewerActivity"
+
         const val EXTRA_BOOK_ID = "bookId"
+
+        private const val RESULT_CREATE_FILE = 1
+
     }
 
 }
