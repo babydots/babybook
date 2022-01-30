@@ -31,8 +31,7 @@ fun createOnboardingFragment(position: Int): Fragment {
 
         else -> {
             title = "Share your creations"
-            description = "Generate a PDF and email it to a friend, or if they have BabyBook installed, " +
-                    "send a book via SMS so they can remix and make it their own."
+            description = "Generate a PDF and email it to a friend, or print it for your own physical book."
             drawableRes = R.drawable.onboarding_tick
         }
     }

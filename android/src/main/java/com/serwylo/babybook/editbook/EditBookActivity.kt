@@ -13,8 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.serwylo.babybook.R
+import com.serwylo.babybook.bookviewer.BookViewerActivity
 import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
+import com.serwylo.babybook.db.daos.BookDao
 import com.serwylo.babybook.db.entities.Book
 import com.serwylo.babybook.editbookpage.EditBookPageActivity
 import com.serwylo.babybook.utils.debounce
@@ -25,7 +27,7 @@ class EditBookActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditBookBinding
     private lateinit var viewModel: EditBookViewModel
 
-    private val dao = AppDatabase.getInstance(this).bookDao()
+    private lateinit var dao: BookDao
 
     private var bookId: Long = 0L
 
@@ -34,6 +36,8 @@ class EditBookActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        dao = AppDatabase.getInstance(this).bookDao()
 
         binding = ActivityEditBookBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -67,8 +71,10 @@ class EditBookActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.add_page -> {
-                onAddPage()
+            R.id.view_book -> {
+                startActivity(Intent(this, BookViewerActivity::class.java).apply {
+                    putExtra(BookViewerActivity.EXTRA_BOOK_ID, bookId)
+                })
                 return true
             }
 
@@ -81,11 +87,17 @@ class EditBookActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.edit_book_menu, menu)
+        if (bookId > 0) {
+            menuInflater.inflate(R.menu.edit_book_menu, menu)
+        }
         return true
     }
 
     private fun setup(bookId: Long) {
+        invalidateOptionsMenu()
+
+        binding.addBookButton.setOnClickListener { onAddPage() }
+
         viewModel.bookTitle.observe(this, { title ->
             if (binding.bookTitle.text.toString() != title) {
                 binding.bookTitle.setText(title)

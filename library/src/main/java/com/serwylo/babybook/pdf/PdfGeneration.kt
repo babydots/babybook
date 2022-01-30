@@ -32,15 +32,21 @@ fun generatePdf(bookTitle: String, pages: List<Page>, outputFile: File, config: 
         println("Writing page: ${page.title}")
         document.newPage()
 
-        // val image: Image = Image.getInstance(scaleImage(page.image).absolutePath)
-        val image: Image = Image.getInstance(page.image.absolutePath)
-        val xScaleRequired = document.pageSize.width / image.width
-        val yScaleRequired = document.pageSize.height / image.height
-        val scale = xScaleRequired.coerceAtLeast(yScaleRequired)
-        image.scaleAbsolute(image.width * scale, image.height * scale)
-        image.setAbsolutePosition((document.pageSize.width - image.scaledWidth) / 2, (document.pageSize.height - image.scaledHeight) / 2)
+        if (page.image != null) {
 
-        document.add(image)
+            // TODO: Find a replacement for scrimage that works with Android. Currently it only would
+            //       work on the server due to a dependency on some JavaSE classes such as ImageIO.
+            // val image: Image = Image.getInstance(scaleImage(page.image).absolutePath)
+            val image: Image = Image.getInstance(page.image.absolutePath)
+
+            val xScaleRequired = document.pageSize.width / image.width
+            val yScaleRequired = document.pageSize.height / image.height
+            val scale = xScaleRequired.coerceAtLeast(yScaleRequired)
+            image.scaleAbsolute(image.width * scale, image.height * scale)
+            image.setAbsolutePosition((document.pageSize.width - image.scaledWidth) / 2, (document.pageSize.height - image.scaledHeight) / 2)
+
+            document.add(image)
+        }
 
         document.add(
             Paragraph(

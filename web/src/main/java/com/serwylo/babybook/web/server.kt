@@ -43,7 +43,7 @@ fun main() {
                     val bookPage = WikiCacheService.getBookPage(title)
                     val bookData = mapOf(
                         "title" to bookPage.title,
-                        "image" to bookPage.image.name,
+                        "image" to bookPage.image?.name,
                         "text" to bookPage.text,
                     )
                     call.respond(bookData)

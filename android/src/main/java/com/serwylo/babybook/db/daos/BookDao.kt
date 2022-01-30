@@ -44,4 +44,7 @@ interface BookDao {
     @Delete(entity = Book::class)
     fun delete(book: Book)
 
+    @Delete(entity = BookPage::class)
+    fun delete(bookPage: BookPage)
+
 }

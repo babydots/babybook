@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="show_onboarding"
+        android:title="Show start screen"
+        android:summary="If you missed start screen the first time" />
+</PreferenceScreen>

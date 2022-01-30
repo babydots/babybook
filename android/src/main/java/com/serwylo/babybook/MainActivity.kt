@@ -44,6 +44,10 @@ class MainActivity : AppCompatActivity() {
                 viewModel.toggleEditMode()
                 return true
             }
+            R.id.settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }

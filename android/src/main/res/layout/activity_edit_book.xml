@@ -12,17 +12,31 @@
         android:layout_height="wrap_content"
         android:hint="Book title"
         android:inputType="textCapSentences"
-        android:layout_margin="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintEnd_toStartOf="@id/add_book_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/add_book_button"
+        app:layout_constraintBottom_toBottomOf="@id/add_book_button" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/add_book_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Add page"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/book_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/pages" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/pages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         tools:listitem="@layout/edit_book_page_item"
-        app:layout_constraintTop_toBottomOf="@id/book_title"
+        app:layout_constraintTop_toBottomOf="@id/add_book_button"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

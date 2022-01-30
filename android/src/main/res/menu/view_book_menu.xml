@@ -2,16 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
+    <!--<item
         android:id="@+id/share"
         android:title="Share"
         android:icon="@drawable/ic_share"
+        app:showAsAction="ifRoom" />-->
+
+    <item
+        android:id="@+id/view_in_wikipedia"
+        android:title="Read more on Wikipedia"
+        android:icon="@drawable/ic_link"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/pdf"
         android:title="Save as PDF"
         android:icon="@drawable/ic_pdf"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
 </menu>

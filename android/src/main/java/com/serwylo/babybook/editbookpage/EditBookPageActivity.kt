@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.serwylo.babybook.R
 import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
 import com.serwylo.babybook.databinding.DialogPageTextInputBinding
@@ -26,6 +27,7 @@ import com.serwylo.babybook.mediawiki.WikiSearchResults
 import com.serwylo.babybook.mediawiki.processTitle
 import com.serwylo.babybook.mediawiki.searchWikiTitles
 import com.serwylo.babybook.utils.debounce
+import com.serwylo.babybook.utils.viewInWikipedia
 import kotlinx.coroutines.runBlocking
 import java.lang.IllegalStateException
 import kotlin.math.min
@@ -200,16 +202,33 @@ class EditBookPageActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.view_in_wikipedia -> {
-                onViewInWikipedia()
+                viewModel.wikiPageTitle.value?.also { title ->
+                    viewInWikipedia(this, title)
+                }
                 return true
             }
 
             R.id.delete_page -> {
-                // viewModel.delete()
+                onDeletePage()
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun onDeletePage() {
+        if (viewModel.pageTitle.value.isNullOrEmpty()) {
+            viewModel.deletePage { finish() }
+        } else {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Delete page?")
+                .setMessage("Are you sure you want to remove this page? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    viewModel.deletePage { finish() }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -220,13 +239,6 @@ class EditBookPageActivity : AppCompatActivity() {
         menu.findItem(R.id.delete_page).isVisible = exists
 
         return true
-    }
-
-    private fun onViewInWikipedia() {
-        viewModel.wikiPageTitle.value?.also { title ->
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://simple.wikipedia.org/wiki/$title"));
-            startActivity(intent)
-        }
     }
 
     companion object {

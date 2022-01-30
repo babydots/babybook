@@ -15,6 +15,8 @@ import java.io.File
 
 class EditBookPageViewModel(private val application: Application, val bookId: Long, private val existingBookPage: BookPage? = null): ViewModel() {
 
+    private var bookPageId = existingBookPage?.id ?: 0L
+
     val wikiPageTitle = MutableLiveData(existingBookPage?.wikiPageTitle ?: "")
     val pageTitle = MutableLiveData(existingBookPage?.pageTitle)
     val wikiPageText = MutableLiveData(existingBookPage?.wikiPageText ?: "")
@@ -40,18 +42,33 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
             }
 
             val details = loadWikiPage(title, dir)
-            val images = downloadImages(details.getImageNamesOfInterest(), dir)
-
             wikiPageText.value = details.parseParagraphs().firstOrNull() ?: ""
-            allImages.value = images
-
-            images.firstOrNull()?.also { image ->
-                mainImage.value = "file://${image.absolutePath}"
-            }
-
             save()
 
+            val imageNames = details.getImageNamesOfInterest()
+            if (imageNames.isNotEmpty()) {
+                val images = downloadImages(details.getImageNamesOfInterest(), dir)
+                allImages.value = images
+                images.firstOrNull()?.also { image ->
+                    mainImage.value = "file://${image.absolutePath}"
+                }
+                save()
+            }
+
             isLoadingPage.value = false
+        }
+    }
+
+    fun deletePage(callback: () -> Unit) {
+        bookPageId.also { id ->
+            if (id > 0) {
+                AppDatabase.executor.execute {
+                    val dao = AppDatabase.getInstance(application).bookDao()
+                    val page = dao.getBookPage(id)
+                    dao.delete(page)
+                    callback()
+                }
+            }
         }
     }
 
@@ -89,8 +106,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                     imagePath = mainImage.value
                 )
 
-                val id = dao.insert(page)
-                println(id)
+                bookPageId = dao.insert(page)
             }
 
         }

@@ -18,6 +18,7 @@ import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.pdf.generatePdf
+import com.serwylo.babybook.utils.viewInWikipedia
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -62,8 +63,14 @@ class BookViewerActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.share -> {
+            /*R.id.share -> {
                 share()
+                return true
+            }*/
+            R.id.view_in_wikipedia -> {
+                viewModel.currentPage.value?.wikiPageTitle?.also { title ->
+                    viewInWikipedia(this, title)
+                }
                 return true
             }
             R.id.pdf -> {
@@ -83,10 +90,6 @@ class BookViewerActivity : AppCompatActivity() {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/pdf"
             putExtra(Intent.EXTRA_TITLE, "${viewModel.book.title}.pdf")
-
-            // Optionally, specify a URI for the directory that should be opened in
-            // the system file picker before your app creates the document.
-            // putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
         }
         startActivityForResult(intent, RESULT_CREATE_FILE)
     }
@@ -118,7 +121,7 @@ class BookViewerActivity : AppCompatActivity() {
         val pages = viewModel.pages.value?.map {
             val file = it.imageFile(this)
 
-            if (file == null) null else Page(
+            Page(
                 it.title(),
                 file,
                 it.text() ?: "",
