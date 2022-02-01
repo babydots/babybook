@@ -1,0 +1,7 @@
+First release of Baby Books:
+
+* Create your own books
+* View built in books
+* Save as PDF and share with friends
+
+Please provide any feedback or report any issues on the issue tracker at https://github.com/babydots/babybook/issues.
