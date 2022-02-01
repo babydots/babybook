@@ -191,13 +191,13 @@ data class ParsedWikiSearchResults(
  * Fetch metadata about a wikipedia page.
  * Will cache the response, and if a cached response already exists on disk, will use that.
  */
-suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage {
+suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(Dispatchers.IO) {
     val cachedFile = File(cacheDir, "${title}.json")
     if (cachedFile.exists()) {
         try {
             println("Cached wiki data exists at ${cachedFile.absolutePath}")
             val wikiData: ParsedWikiPage = Gson().fromJson(cachedFile.readText(), ParsedWikiPage::class.java)
-            return WikiPage(wikiData)
+            return@withContext WikiPage(wikiData)
         } catch (e: Exception) {
             println("Error parsing cached wiki data, will remove it and then load from wikipedia again: ${e.message}")
             cachedFile.delete()
@@ -228,7 +228,7 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage {
     println("Caching wiki data to ${cachedFile.absolutePath}")
     cachedFile.writeText(Gson().toJson(response))
 
-    return responseWikiPage
+    return@withContext responseWikiPage
 }
 
 suspend fun downloadImages(imageNames: List<String>, destDir: File): List<File> = coroutineScope {

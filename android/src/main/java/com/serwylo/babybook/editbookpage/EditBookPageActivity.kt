@@ -76,6 +76,23 @@ class EditBookPageActivity : AppCompatActivity() {
 
         invalidateOptionsMenu()
 
+        binding.pageUp.setOnClickListener { viewModel.movePageUp() }
+        binding.pageDown.setOnClickListener { viewModel.movePageDown() }
+
+        viewModel.pageNumber.observe(this) { pageNumber ->
+            if (pageNumber > 0) {
+                binding.pageNoLabel.text = "Page $pageNumber"
+
+                binding.pageUp.visibility = View.VISIBLE
+                binding.pageDown.visibility = View.VISIBLE
+                binding.pageNoLabel.visibility = View.VISIBLE
+            } else {
+                binding.pageUp.visibility = View.GONE
+                binding.pageDown.visibility = View.GONE
+                binding.pageNoLabel.visibility = View.GONE
+            }
+        }
+
         viewModel.isSearchingPages.observe(this) { isSearching ->
             if (isSearching) {
                 Log.d(TAG, "setup: Updating view in response to vm.isSearchingPages")
@@ -99,6 +116,7 @@ class EditBookPageActivity : AppCompatActivity() {
 
                 binding.image.visibility = View.GONE
                 binding.bookPageTitleText.visibility = View.GONE
+                binding.bookPageText.visibility = View.GONE
             } else {
                 Log.d(TAG, "setup: Updating view in response to !vm.isLoadingPage")
                 binding.loadingSpinner.visibility = View.GONE
@@ -106,13 +124,25 @@ class EditBookPageActivity : AppCompatActivity() {
 
                 binding.image.visibility = View.VISIBLE
                 binding.bookPageTitleText.visibility = View.VISIBLE
+                binding.bookPageText.visibility = View.VISIBLE
             }
         }
 
         viewModel.pageText.observe(this) { binding.bookPageText.text = viewModel.text() }
-        viewModel.wikiPageText.observe(this) { binding.bookPageText.text = viewModel.text() }
 
-        viewModel.pageTitle.observe(this) { binding.bookPageTitleText.text = viewModel.title() }
+        viewModel.wikiPageText.observe(this) {
+            binding.bookPageText.text = viewModel.text()
+
+            // No need to also do this for viewModel.pageText, because that can only happen if
+            // we were already displaying the editText view.
+            binding.editText.visibility = if (it.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+
+        viewModel.pageTitle.observe(this) {
+            binding.bookPageTitleText.text = viewModel.title()
+            binding.editTitle.visibility = if (it.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+
         viewModel.wikiPageTitle.observe(this) {
             binding.bookPageTitleText.text = viewModel.title()
 

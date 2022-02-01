@@ -1,6 +1,7 @@
 package com.serwylo.babybook.editbookpage
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,10 +11,14 @@ import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.mediawiki.downloadImages
 import com.serwylo.babybook.mediawiki.loadWikiPage
 import com.serwylo.babybook.mediawiki.processTitle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class EditBookPageViewModel(private val application: Application, val bookId: Long, private val existingBookPage: BookPage? = null): ViewModel() {
+
+    private val dao = AppDatabase.getInstance(application).bookDao()
 
     private var bookPageId = existingBookPage?.id ?: 0L
 
@@ -21,6 +26,7 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
     val pageTitle = MutableLiveData(existingBookPage?.pageTitle)
     val wikiPageText = MutableLiveData(existingBookPage?.wikiPageText ?: "")
     val pageText = MutableLiveData(existingBookPage?.pageText)
+    val pageNumber = MutableLiveData(existingBookPage?.pageNumber ?: 0)
     val mainImage = MutableLiveData<String?>(existingBookPage?.imagePath)
     val allImages = MutableLiveData(listOf<File>())
 
@@ -30,8 +36,52 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
     fun title() = pageTitle.value ?: wikiPageTitle.value ?: ""
     fun text() = pageText.value ?: wikiPageText.value ?: ""
 
+    fun movePageUp() {
+        AppDatabase.executor.execute {
+            val currentId = bookPageId
+            if (currentId < 0) {
+                return@execute
+            }
+
+            val currentPage = dao.getBookPage(bookPageId)
+            val maxPage = dao.countPages(bookId)
+            if (currentPage.pageNumber >= maxPage) {
+                return@execute
+            }
+
+            val nextPage = dao.getPageNumber(currentPage.pageNumber + 1) ?: return@execute
+
+            dao.update(currentPage.copy(pageNumber = currentPage.pageNumber + 1).apply { id = currentPage.id })
+            dao.update(nextPage.copy(pageNumber = nextPage.pageNumber - 1).apply { id = nextPage.id })
+
+            pageNumber.postValue(currentPage.pageNumber + 1)
+        }
+    }
+
+    fun movePageDown() {
+        AppDatabase.executor.execute {
+            val currentId = bookPageId
+            if (currentId < 0) {
+                return@execute
+            }
+
+            val currentPage = dao.getBookPage(bookPageId)
+            if (currentPage.pageNumber <= 1) {
+                return@execute
+            }
+
+            val previousPage = dao.getPageNumber(currentPage.pageNumber - 1) ?: return@execute
+
+            dao.update(currentPage.copy(pageNumber = currentPage.pageNumber - 1).apply { id = currentPage.id })
+            dao.update(previousPage.copy(pageNumber = previousPage.pageNumber + 1).apply { id = previousPage.id })
+
+            pageNumber.postValue(currentPage.pageNumber - 1)
+        }
+    }
+
     fun preparePage(title: String) {
-        viewModelScope.launch {
+        Log.d(TAG, "preparePage: Getting ready to fetch wiki data")
+        viewModelScope.launch(Dispatchers.Main) {
             isLoadingPage.value = true
 
             pageTitle.value = processTitle(title)
@@ -63,7 +113,6 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
         bookPageId.also { id ->
             if (id > 0) {
                 AppDatabase.executor.execute {
-                    val dao = AppDatabase.getInstance(application).bookDao()
                     val page = dao.getBookPage(id)
                     dao.delete(page)
                     callback()
@@ -79,23 +128,23 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
     }
 
     fun save() {
-        val dao = AppDatabase.getInstance(application).bookDao()
-
         AppDatabase.executor.execute {
 
-            if (existingBookPage != null) {
+            if (bookPageId > 0) {
+                Log.d(TAG, "save: Updating existing book page")
                 val page = BookPage(
-                    pageNumber = existingBookPage.pageNumber,
+                    pageNumber = pageNumber.value!!,
                     wikiPageTitle = wikiPageTitle.value ?: "",
                     wikiPageText = wikiPageText.value ?: "",
                     pageTitle = pageTitle.value,
                     pageText = pageText.value,
                     bookId = bookId,
                     imagePath = mainImage.value
-                ).apply { id = existingBookPage.id }
+                ).apply { id = bookPageId }
 
                 dao.update(page)
             } else {
+                Log.d(TAG, "save: Adding new book page")
                 val page = BookPage(
                     pageNumber = dao.countPages(bookId) + 1,
                     wikiPageTitle = wikiPageTitle.value ?: "",
@@ -107,9 +156,14 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                 )
 
                 bookPageId = dao.insert(page)
+                pageNumber.postValue(page.pageNumber) // WARNING: This may not update in time for a subsequent call to 'save'!
             }
 
         }
+    }
+
+    companion object {
+        private const val TAG = "EditBookPageViewModel"
     }
 
     fun manuallyUpdateTitle(title: String) {

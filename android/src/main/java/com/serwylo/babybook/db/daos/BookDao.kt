@@ -47,4 +47,10 @@ interface BookDao {
     @Delete(entity = BookPage::class)
     fun delete(bookPage: BookPage)
 
+    @Query("UPDATE BookPage SET pageNumber = :pageNumber WHERE pageNumber = :pageId")
+    fun setPageNumber(pageId: Long, pageNumber: Int)
+
+    @Query("SELECT * FROM BookPage WHERE pageNumber = :pageNumber")
+    fun getPageNumber(pageNumber: Int): BookPage?
+
 }

@@ -7,7 +7,7 @@
         <entry key="../../Library/Android/sdk/platforms/android-31/data/res/layout/simple_list_item_2.xml" value="0.20052083333333334" />
         <entry key="android/src/main/res/layout/activity_book_viewer.xml" value="0.25" />
         <entry key="android/src/main/res/layout/activity_edit_book.xml" value="0.375" />
-        <entry key="android/src/main/res/layout/activity_edit_book_page.xml" value="0.25" />
+        <entry key="android/src/main/res/layout/activity_edit_book_page.xml" value="0.375" />
         <entry key="android/src/main/res/layout/activity_main.xml" value="0.16927083333333334" />
         <entry key="android/src/main/res/layout/activity_onboarding.xml" value="0.19010416666666666" />
         <entry key="android/src/main/res/layout/activity_settings.xml" value="0.1" />
