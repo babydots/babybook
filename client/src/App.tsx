@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import {Button, Col, Container, Form, FormGroup, Input, Label, Row, Spinner, Card, CardImg, CardImgOverlay} from "reactstrap";
-import {FaCheck} from "react-icons/all";
+import {FaCheck} from "react-icons/fa";
 import {AsyncTypeahead} from "react-bootstrap-typeahead";
 
 type IExampleBook = {

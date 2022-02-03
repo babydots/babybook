@@ -17,4 +17,5 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+// For heroku deployments.
 task stage(dependsOn: [':web:dist'])
