@@ -12,9 +12,11 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import java.io.IOException
 
-fun main() {
+fun main(args: Array<String>) {
 
-    embeddedServer(Netty, port = 8080) {
+    val port = getIntArg("PORT", "port", args) ?: 8080
+
+    embeddedServer(Netty, port = port) {
         install(CORS) {
             host("localhost:3000")
             host("localhost:8080")
@@ -93,4 +95,17 @@ fun main() {
         }
 
     }.start(wait = true)
+}
+
+private fun getIntArg(envName: String, argName: String, args: Array<String>) =
+    getStringArg(envName, argName, args)?.toIntOrNull()
+
+private fun getStringArg(envName: String, argName: String, args: Array<String>): String? {
+    val envValue = System.getenv(envName)
+
+    val cliValue = args
+        .find { it.startsWith("--$argName=") }
+        ?.substring("--$argName=".length)
+
+    return cliValue ?: envValue
 }
