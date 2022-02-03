@@ -32,6 +32,9 @@ import kotlinx.coroutines.runBlocking
 import java.lang.IllegalStateException
 import kotlin.math.min
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class EditBookPageActivity : AppCompatActivity() {
@@ -172,7 +175,11 @@ class EditBookPageActivity : AppCompatActivity() {
                 val newTitle = binding.bookPageTitle.text.toString()
                 viewModel.wikiPageTitle.value = newTitle
                 if (newTitle.isNotEmpty()) {
-                    viewModel.preparePage(newTitle)
+                    lifecycleScope.launch {
+                        if (!viewModel.preparePage(newTitle)) {
+                            Toast.makeText(applicationContext, "An error occurred fetching the \"$newTitle\" page details from wikipedia. Are you connected to the internet?", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 } else {
                     viewModel.clearPage()
                 }
@@ -318,12 +325,18 @@ class EditBookPageActivity : AppCompatActivity() {
                     runBlocking {
                         viewModel.isSearchingPages.postValue(true)
 
-                        val searchResults = searchWikiTitles(constraint.toString())
+                        try {
+                            val searchResults = searchWikiTitles(constraint.toString())
 
-                        if (latestSearchTerms == constraint.toString()) {
-                            Log.i("WikiSearch", "Found ${searchResults.results.size} results for $constraint which matches the latest search we performed: $latestSearchTerms")
-                            results.values = searchResults.results
-                            results.count = searchResults.results.size
+                            if (latestSearchTerms == constraint.toString()) {
+                                Log.i("WikiSearch", "Found ${searchResults.results.size} results for $constraint which matches the latest search we performed: $latestSearchTerms")
+                                results.values = searchResults.results
+                                results.count = searchResults.results.size
+                            }
+                        } catch (e: Throwable) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(applicationContext, "An error occurred searching wikipedia. Are you connected to the internet?", Toast.LENGTH_LONG).show()
+                            }
                         }
 
                         viewModel.isSearchingPages.postValue(false)

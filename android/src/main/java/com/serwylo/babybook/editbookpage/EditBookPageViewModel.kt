@@ -79,11 +79,11 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
         }
     }
 
-    fun preparePage(title: String) {
+    suspend fun preparePage(title: String): Boolean = withContext(Dispatchers.Main) {
         Log.d(TAG, "preparePage: Getting ready to fetch wiki data")
-        viewModelScope.launch(Dispatchers.Main) {
-            isLoadingPage.value = true
+        isLoadingPage.value = true
 
+        try {
             pageTitle.value = processTitle(title)
 
             val dir = File(application.filesDir, title)
@@ -105,6 +105,10 @@ class EditBookPageViewModel(private val application: Application, val bookId: Lo
                 save()
             }
 
+            return@withContext true
+        } catch (e: Throwable) {
+            return@withContext false
+        } finally {
             isLoadingPage.value = false
         }
     }
