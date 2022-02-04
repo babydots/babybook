@@ -4,6 +4,8 @@
 
 Baby Book is an Android app and a website for creating books to help (you and) your growing child learn.
 
+Web version: http://book.serwylo.com (running on a free and small Heroku dyno, so may take a moment to warm up when you first visit).
+
 <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/01_book_list.png" alt="Screenshot of android app showing the main booklist" height="400"/> <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/02_page_a.png" alt="Screenshot of android app showing a book page about tractors" height="400"> <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/03_edit_book.png" alt="Screenshot of android app showing a book being edited with all pages visible." height="400"> <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/04_edit_page_b.png" alt="Screenshot of android app searching wiki for a new page to add" height="400"/>
 
 ## Contributing

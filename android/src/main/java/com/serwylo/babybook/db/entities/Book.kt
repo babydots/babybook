@@ -6,9 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class Book(
    val title: String,
-) {
 
    @PrimaryKey(autoGenerate = true)
-   var id: Long = 0
-
-}
+   val id: Long = 0,
+)
