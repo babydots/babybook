@@ -6,19 +6,25 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.serwylo.babybook.booklist.BookListViewModel
+import com.serwylo.babybook.booklist.BookListViewModelFactory
 import com.serwylo.babybook.databinding.ActivityMainBinding
-import com.serwylo.babybook.editbook.EditBookActivity
+import com.serwylo.babybook.db.AppDatabase
+import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.onboarding.OnboardingActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: BookListViewModel by viewModels()
+    private lateinit var viewModel: BookListViewModel
 
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel = ViewModelProvider(this, BookListViewModelFactory(BookRepository(AppDatabase.getInstance(this).bookDao())))
+            .get(BookListViewModel::class.java)
 
         if (!Preferences.isOnboardingComplete(this)) {
             Preferences.setOnboardingComplete(this)

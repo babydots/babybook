@@ -1,25 +1,28 @@
 package com.serwylo.babybook.booklist
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.serwylo.babybook.db.AppDatabase
-import com.serwylo.babybook.db.daos.BookDao
-import com.serwylo.babybook.db.entities.Book
+import androidx.lifecycle.*
+import com.serwylo.babybook.db.entities.BookWithCoverPage
+import com.serwylo.babybook.db.repositories.BookRepository
 
 
-class BookListViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val bookDao: BookDao = AppDatabase.getInstance(application).bookDao()
+class BookListViewModel(repository: BookRepository) : ViewModel() {
 
     val isInEditMode = MutableLiveData(false)
 
-    val allBooks: LiveData<List<Book>>
-        get() = bookDao.findAll()
+    val allBooks: LiveData<List<BookWithCoverPage>> = repository.getAllBooksWithCoverPage()
 
     fun toggleEditMode() {
         isInEditMode.value = !(isInEditMode.value ?: false)
     }
 
+}
+
+class BookListViewModelFactory(private val repository: BookRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(BookListViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BookListViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

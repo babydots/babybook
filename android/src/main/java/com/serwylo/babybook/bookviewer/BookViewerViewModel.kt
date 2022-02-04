@@ -1,60 +1,53 @@
 package com.serwylo.babybook.bookviewer
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.serwylo.babybook.db.entities.Book
-import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.repositories.BookRepository
 
 class BookViewerViewModel(
-    val book: Book,
-    val pages: LiveData<List<BookPage>>,
+    repository: BookRepository,
+    bookId: Long
 ) : ViewModel() {
 
-    var currentPage: MutableLiveData<BookPage?> = MutableLiveData(pages.value?.firstOrNull())
+    val bookWithPages = repository.getBookWithPages(bookId)
 
-    private fun currentPageIndex() = pages.value?.indexOfFirst { it.id == currentPage.value?.id } ?: -1
+    var currentPageIndex: MutableLiveData<Int> = MutableLiveData(0)
 
-    fun nextPage(): BookPage? {
-        val index = currentPageIndex()
-        val pages = pages.value ?: return null
+    fun currentPage() = bookWithPages.value?.pages?.get(currentPageIndex.value!!)
 
-        return if (index < pages.size - 1) {
-            pages[index + 1]
-        } else {
-            null
-        }
-    }
+    fun hasNextPage() = currentPageIndex.value!! < (bookWithPages.value?.pages?.size ?: 0) - 1
+    fun hasPreviousPage() = currentPageIndex.value!! > 0
 
     fun turnToNextPage() {
-        val next = nextPage() ?: return
-        currentPage.value = next
-    }
-
-    fun previousPage(): BookPage? {
-        val index = currentPageIndex()
-        val pages = pages.value ?: return null
-
-        return if (index > 0 && pages.isNotEmpty()) {
-            pages[index - 1]
-        } else {
-            null
+        currentPageIndex.value?.also { index ->
+            bookWithPages.value?.pages?.size?.also { pagesSize ->
+                if (index < pagesSize - 1) {
+                    currentPageIndex.value = index + 1
+                }
+            }
         }
     }
 
     fun turnToPreviousPage() {
-        val previous = previousPage() ?: return
-        currentPage.value = previous
+        currentPageIndex.value?.also { index ->
+            if (index > 0) {
+                currentPageIndex.value = index - 1
+            }
+        }
+    }
+
+    fun pageCount(): Int {
+        return bookWithPages.value?.pages?.size ?: 0
     }
 
 }
 
-class BookViewerModelFactory(private val book: Book, private val pages: LiveData<List<BookPage>>) : ViewModelProvider.Factory {
+class BookViewerModelFactory(private val repository: BookRepository, private val bookId: Long) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(BookViewerViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return BookViewerViewModel(book, pages) as T
+            return BookViewerViewModel(repository, bookId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

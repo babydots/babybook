@@ -1,39 +1,65 @@
 package com.serwylo.babybook.editbook
 
-import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.serwylo.babybook.db.AppDatabase
+import androidx.lifecycle.*
+import com.serwylo.babybook.db.entities.Book
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.repositories.BookRepository
+import com.serwylo.babybook.utils.debounce
+import kotlinx.coroutines.launch
 
 class EditBookViewModel(
-    private val application: Application,
-    private val bookId: Long,
-    title: String,
-    val pages: LiveData<List<BookPage>>,
+    private val repository: BookRepository,
+    initialBookId: Long,
 ) : ViewModel() {
 
-    private val dao = AppDatabase.getInstance(application).bookDao()
+    private val _bookTitle: MutableLiveData<String> = MutableLiveData("")
+    val bookTitle: LiveData<String> = _bookTitle
 
-    fun deleteBook(callback: () -> Unit) {
-        AppDatabase.executor.execute {
-            val book = dao.getBook(bookId)
-            dao.delete(book)
-            callback()
+    lateinit var pages: LiveData<List<BookPage>>
+
+    private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(true)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private lateinit var book: Book
+
+    fun getBookId(): Long = if (this::book.isInitialized) book.id else 0L
+
+    init {
+        viewModelScope.launch {
+            book = if (initialBookId > 0L) {
+                repository.getBook(initialBookId)
+            } else {
+                repository.addNewBook()
+            }
+
+            pages = repository.getBookPages(book)
+            _bookTitle.value = book.title
+            _isLoading.value = false
         }
     }
 
-    var bookTitle: MutableLiveData<String> = MutableLiveData(title)
+    fun updateTitle(title: String) {
+        _bookTitle.value = title
+        debouncedSaveTitle(title)
+    }
+
+    suspend fun deleteBook() {
+        repository.removeBook(book)
+    }
+
+    private val debouncedSaveTitle = debounce<String>(300, viewModelScope) { title ->
+        viewModelScope.launch {
+            repository.updateTitle(book, title)
+        }
+    }
 
 }
 
-class EditBookViewModelFactory(private val application: Application, private val bookId: Long, private val title: String, private val pages: LiveData<List<BookPage>>) : ViewModelProvider.Factory {
+class EditBookViewModelFactory(private val repository: BookRepository, private val bookId: Long) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(EditBookViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return EditBookViewModel(application, bookId, title, pages) as T
+            return EditBookViewModel(repository, bookId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

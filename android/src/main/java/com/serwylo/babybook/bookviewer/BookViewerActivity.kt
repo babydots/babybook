@@ -17,6 +17,8 @@ import com.serwylo.babybook.book.BookConfig
 import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
+import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
 import com.squareup.picasso.Picasso
@@ -27,6 +29,7 @@ import java.io.*
 class BookViewerActivity : AppCompatActivity() {
 
     private lateinit var viewModel: BookViewerViewModel
+    private lateinit var binding: ActivityBookViewerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -34,25 +37,15 @@ class BookViewerActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val binding = ActivityBookViewerBinding.inflate(layoutInflater)
+        binding = ActivityBookViewerBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
 
-        AppDatabase.executor.execute {
+        val dao = AppDatabase.getInstance(this).bookDao()
+        val bookId = intent.extras?.getLong(EXTRA_BOOK_ID) ?: error("Can't view book, expected to find the ID of the book in the Intent $EXTRA_BOOK_ID but not found.")
 
-            val dao = AppDatabase.getInstance(this).bookDao()
-
-            val bookId = intent.extras?.getLong(EXTRA_BOOK_ID) ?: error("Can't view book, expected to find the ID of the book in the Intent $EXTRA_BOOK_ID but not found.")
-            val book = dao.getBook(bookId)
-            val pages = dao.getBookPages(bookId)
-
-            viewModel = ViewModelProvider(this, BookViewerModelFactory(book, pages)).get(BookViewerViewModel::class.java)
-
-            runOnUiThread {
-                setup(binding)
-            }
-
-        }
+        viewModel = ViewModelProvider(this@BookViewerActivity, BookViewerModelFactory(BookRepository(dao), bookId)).get(BookViewerViewModel::class.java)
+        setup(binding)
 
     }
 
@@ -68,7 +61,7 @@ class BookViewerActivity : AppCompatActivity() {
                 return true
             }*/
             R.id.view_in_wikipedia -> {
-                viewModel.currentPage.value?.wikiPageTitle?.also { title ->
+                viewModel.currentPage()?.wikiPageTitle?.also { title ->
                     viewInWikipedia(this, title)
                 }
                 return true
@@ -89,7 +82,7 @@ class BookViewerActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/pdf"
-            putExtra(Intent.EXTRA_TITLE, "${viewModel.book.title}.pdf")
+            putExtra(Intent.EXTRA_TITLE, "${viewModel.bookWithPages.value?.book?.title}.pdf")
         }
         startActivityForResult(intent, RESULT_CREATE_FILE)
     }
@@ -118,58 +111,72 @@ class BookViewerActivity : AppCompatActivity() {
     }
 
     private suspend fun exportPdf(outputStream: OutputStream) {
-        val pages = viewModel.pages.value?.map {
-            val file = it.imageFile(this)
+        viewModel.bookWithPages.value?.also { bookWithPages ->
+            val pages = bookWithPages.pages.map {
+                val file = it.imageFile(this)
 
-            Page(
-                it.title(),
-                file,
-                it.text() ?: "",
-            )
-        } ?: listOf()
+                Page(
+                    it.title(),
+                    file,
+                    it.text() ?: "",
+                )
+            }
 
-        val pdfFile = File(cacheDir, "${viewModel.book.title}.pdf")
+            val pdfFile = File(cacheDir, "${bookWithPages.book.title}.pdf")
 
-        generatePdf(viewModel.book.title, pages.filterNotNull(), pdfFile, BookConfig.Default)
+            generatePdf(bookWithPages.book.title, pages.filterNotNull(), pdfFile, BookConfig.Default)
 
-        pdfFile.inputStream().use { it.copyTo(outputStream) }
+            pdfFile.inputStream().use { it.copyTo(outputStream) }
+        }
     }
 
     private fun setup(binding: ActivityBookViewerBinding) {
 
-        supportActionBar?.title = viewModel.book.title
+        viewModel.bookWithPages.observe(this) { value ->
+            supportActionBar?.title = value.book.title
+
+            val firstPage = value.pages.firstOrNull()
+            if (firstPage == null) {
+                Toast.makeText(this, "This book does not have any pages yet.", Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                showPage(firstPage)
+            }
+        }
 
         binding.previous.setOnClickListener { viewModel.turnToPreviousPage() }
         binding.next.setOnClickListener { viewModel.turnToNextPage() }
 
-        viewModel.currentPage.observe(this) {
-            binding.previous.visibility = if (viewModel.previousPage() == null) View.GONE else View.VISIBLE
-            binding.next.visibility = if (viewModel.nextPage() == null) View.GONE else View.VISIBLE
-
-            it?.also { page ->
-                if (page.imagePath == null) {
-                    binding.image.visibility = View.GONE
-                } else {
-                    binding.image.visibility = View.VISIBLE
-                    Picasso.get()
-                        .load(page.imagePath)
-                        .fit()
-                        .centerCrop()
-                        .into(binding.image)
-                }
-
-                binding.title.text = page.title()
-                binding.text.text = page.text()
+        viewModel.currentPageIndex.observe(this) { currentPage ->
+            // Be defensive here, because it is almost always guaranteed that we receive a
+            // currentPageIndex value of 0 in this observer, prior to loading the page data from
+            // the database. If so, just ignore it (the actual first page render will be triggered
+            // by the observer on viewModel.bookWithPages).
+            val pages = viewModel.bookWithPages.value?.pages
+            if (pages != null && pages.size > currentPage) {
+                showPage(pages[currentPage])
             }
         }
+    }
 
-        viewModel.pages.observe(this) { pages ->
-            val current = viewModel.currentPage.value
+    private fun showPage(page: BookPage) {
 
-            if (pages.none { it.id == current?.id }) {
-                viewModel.currentPage.value = pages.firstOrNull()
-            }
+        binding.previous.visibility = if (viewModel.hasPreviousPage()) View.VISIBLE else View.GONE
+        binding.next.visibility = if (viewModel.hasNextPage()) View.VISIBLE else View.GONE
+
+        if (page.imagePath == null) {
+            binding.image.visibility = View.GONE
+        } else {
+            binding.image.visibility = View.VISIBLE
+            Picasso.get()
+                .load(page.imagePath)
+                .fit()
+                .centerCrop()
+                .into(binding.image)
         }
+
+        binding.title.text = page.title()
+        binding.text.text = page.text()
     }
 
     companion object {

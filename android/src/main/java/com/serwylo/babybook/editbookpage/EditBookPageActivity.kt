@@ -1,7 +1,5 @@
 package com.serwylo.babybook.editbookpage
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -14,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -23,14 +20,12 @@ import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
 import com.serwylo.babybook.databinding.DialogPageTextInputBinding
 import com.serwylo.babybook.databinding.DialogPageTitleInputBinding
 import com.serwylo.babybook.db.AppDatabase
+import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.mediawiki.WikiSearchResults
-import com.serwylo.babybook.mediawiki.processTitle
 import com.serwylo.babybook.mediawiki.searchWikiTitles
-import com.serwylo.babybook.utils.debounce
 import com.serwylo.babybook.utils.viewInWikipedia
 import kotlinx.coroutines.runBlocking
 import java.lang.IllegalStateException
-import kotlin.math.min
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,23 +51,9 @@ class EditBookPageActivity : AppCompatActivity() {
         }
 
         val existingId = intent.extras?.getLong(EXTRA_BOOK_PAGE_ID, 0L) ?: 0L
-        if (existingId > 0) {
-            AppDatabase.executor.execute {
-                Log.d(TAG, "onCreate: Loading page from DB")
-                val page = AppDatabase.getInstance(this).bookDao().getBookPage(existingId)
-                runOnUiThread {
-                    viewModel = ViewModelProvider(this, EditBookPageViewModelFactory(application, bookId, page)).get(
-                        EditBookPageViewModel::class.java)
-                    Log.d(TAG, "onCreate: Page ${page.id} loaded, values assigned to ViewModel. Will call setup()")
-                    setup()
-                }
-            }
-        } else {
-            Log.d(TAG, "onCreate: New page, creating empty viewModel.")
-            viewModel = ViewModelProvider(this, EditBookPageViewModelFactory(application, bookId)).get(
-                EditBookPageViewModel::class.java)
-            setup()
-        }
+        val repository = BookRepository(AppDatabase.getInstance(this).bookDao())
+        viewModel = ViewModelProvider(this@EditBookPageActivity, EditBookPageViewModelFactory(repository, filesDir, bookId, existingId)).get(EditBookPageViewModel::class.java)
+        setup()
     }
 
     private fun setup() {
@@ -110,7 +91,7 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.isLoadingPage.observe(this) { isLoading ->
+        viewModel.isPreparingPage.observe(this) { isLoading ->
             if (isLoading) {
                 Log.d(TAG, "setup: Updating view in response to vm.isLoadingPage")
                 binding.loadingSpinner.visibility = View.VISIBLE
@@ -255,13 +236,19 @@ class EditBookPageActivity : AppCompatActivity() {
 
     private fun onDeletePage() {
         if (viewModel.pageTitle.value.isNullOrEmpty()) {
-            viewModel.deletePage { finish() }
+            lifecycleScope.launch {
+                viewModel.deletePage()
+                finish()
+            }
         } else {
             MaterialAlertDialogBuilder(this)
                 .setTitle("Delete page?")
                 .setMessage("Are you sure you want to remove this page? This action cannot be undone.")
                 .setPositiveButton("Delete") { _, _ ->
-                    viewModel.deletePage { finish() }
+                    lifecycleScope.launch {
+                        viewModel.deletePage()
+                        finish()
+                    }
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
