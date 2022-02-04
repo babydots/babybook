@@ -4,9 +4,18 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.serwylo.babybook.db.entities.Book
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.entities.BookWithCoverPage
+import com.serwylo.babybook.db.entities.BookWithPages
 
 @Dao
 interface BookDao {
+
+    @Query("SELECT Book.*, BookPage.imagePath as coverPageImagePath FROM Book LEFT JOIN BookPage ON BookPage.id = (SELECT bp.id FROM BookPage as bp WHERE bp.imagePath IS NOT NULL AND bp.bookId = Book.id ORDER BY bp.pageNumber ASC LIMIT 0, 1)")
+    fun findAllWithCoverPage(): LiveData<List<BookWithCoverPage>>
+
+    @Transaction
+    @Query("SELECT * FROM Book WHERE id = :bookId")
+    fun getBookWithPages(bookId: Long): LiveData<BookWithPages>
 
     @Query("SELECT * FROM Book")
     fun findAll(): LiveData<List<Book>>
@@ -15,42 +24,42 @@ interface BookDao {
     fun getBookPages(bookId: Long): LiveData<List<BookPage>>
 
     @Query("SELECT imagePath FROM BookPage WHERE bookId = :bookId AND imagePath IS NOT NULL ORDER BY pageNumber ASC LIMIT 0, 1")
-    fun getBookCoverImage(bookId: Long): String?
+    suspend fun getBookCoverImage(bookId: Long): String?
 
     @Insert
-    fun insert(book: Book): Long
+    suspend fun insert(book: Book): Long
 
     @Insert
-    fun insert(page: BookPage): Long
+    suspend fun insert(page: BookPage): Long
 
     @Query("SELECT * FROM Book WHERE id = :id")
-    fun getBook(id: Long): Book
+    suspend fun getBook(id: Long): Book
 
     @Query("SELECT * FROM Book WHERE id = :id")
     fun getBookLive(id: Long): LiveData<Book>
 
     @Query("SELECT * FROM BookPage WHERE id = :id")
-    fun getBookPage(id: Long): BookPage
+    suspend fun getBookPage(id: Long): BookPage
 
     @Query("SELECT COUNT(*) FROM BookPage WHERE bookId = :bookId")
-    fun countPages(bookId: Long): Int
+    suspend fun countPages(bookId: Long): Int
 
     @Update
-    fun update(book: Book)
+    suspend fun update(book: Book)
 
     @Update
-    fun update(bookPage: BookPage)
+    suspend fun update(bookPage: BookPage)
 
     @Delete(entity = Book::class)
-    fun delete(book: Book)
+    suspend fun delete(book: Book)
 
     @Delete(entity = BookPage::class)
-    fun delete(bookPage: BookPage)
+    suspend fun delete(bookPage: BookPage)
 
     @Query("UPDATE BookPage SET pageNumber = :pageNumber WHERE pageNumber = :pageId")
-    fun setPageNumber(pageId: Long, pageNumber: Int)
+    suspend fun setPageNumber(pageId: Long, pageNumber: Int)
 
     @Query("SELECT * FROM BookPage WHERE pageNumber = :pageNumber")
-    fun getPageNumber(pageNumber: Int): BookPage?
+    suspend fun getPageNumber(pageNumber: Int): BookPage?
 
 }
