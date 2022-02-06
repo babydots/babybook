@@ -8,7 +8,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.databinding.EditBookPageItemBinding
 import com.serwylo.babybook.db.entities.BookPage
-import com.serwylo.babybook.mediawiki.processTitle
 import com.squareup.picasso.Picasso
 
 class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder>() {

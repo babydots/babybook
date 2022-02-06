@@ -234,7 +234,7 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(
 suspend fun downloadImages(imageNames: List<String>, destDir: File): List<File> = coroutineScope {
     println("Downloading ${imageNames.size} images (but really just downloading the first for now).")
 
-    val jobs = imageNames.subList(0, 1).map { filename ->
+    val jobs = imageNames.map { filename ->
         async(Dispatchers.IO) { downloadWikiImage(filename, destDir) }
     }
 

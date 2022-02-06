@@ -5,12 +5,15 @@
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.3687179487179487" />
         <entry key="../../Library/Android/sdk/platforms/android-31/data/res/layout/simple_list_item_2.xml" value="0.20052083333333334" />
+        <entry key="android/src/main/res/drawable/image_count_background.xml" value="0.375" />
         <entry key="android/src/main/res/layout/activity_book_viewer.xml" value="0.25" />
         <entry key="android/src/main/res/layout/activity_edit_book.xml" value="0.375" />
-        <entry key="android/src/main/res/layout/activity_edit_book_page.xml" value="0.375" />
+        <entry key="android/src/main/res/layout/activity_edit_book_page.xml" value="0.55" />
         <entry key="android/src/main/res/layout/activity_main.xml" value="0.16927083333333334" />
         <entry key="android/src/main/res/layout/activity_onboarding.xml" value="0.19010416666666666" />
         <entry key="android/src/main/res/layout/activity_settings.xml" value="0.1" />
+        <entry key="android/src/main/res/layout/dialog_page_image_selector.xml" value="0.35885416666666664" />
+        <entry key="android/src/main/res/layout/dialog_page_image_selector_item.xml" value="0.190625" />
         <entry key="android/src/main/res/layout/dialog_page_text_input.xml" value="0.359375" />
         <entry key="android/src/main/res/layout/dialog_page_title_input.xml" value="0.5" />
         <entry key="android/src/main/res/layout/dialog_text_input.xml" value="0.19010416666666666" />
