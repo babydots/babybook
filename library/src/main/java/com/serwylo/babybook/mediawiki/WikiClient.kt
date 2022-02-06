@@ -11,11 +11,13 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
+import org.apache.commons.codec.digest.DigestUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.net.URLDecoder
 import java.nio.charset.Charset
+import java.security.MessageDigest
 import java.util.*
 
 suspend fun makePages(
@@ -241,6 +243,14 @@ suspend fun downloadImages(imageNames: List<String>, destDir: File): List<File> 
     return@coroutineScope jobs.awaitAll()
 }
 
+fun commonsUrlForImage(filename: String): String {
+    val name = filename.replace(' ', '_')
+    val md5 = DigestUtils.md5Hex(name)
+    val width = 1024
+    val suffix = "${width}px-$name"
+    return "https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.substring(0, 1)}/${md5.substring(0, 2)}/$name/$suffix"
+}
+
 suspend fun downloadWikiImage(filename: String, destDir: File): File {
     val outputFile = File(destDir, filename)
 
@@ -249,7 +259,7 @@ suspend fun downloadWikiImage(filename: String, destDir: File): File {
         return outputFile
     }
 
-    val url = "https://simple.wikipedia.org/wiki/Special:FilePath/$filename"
+    val url = commonsUrlForImage(filename)
 
     println("Downloading $url")
 
