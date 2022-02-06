@@ -82,7 +82,7 @@ class EditBookPageActivity : AppCompatActivity() {
         viewModel.isSearchingPages.observe(this) { isSearching ->
             if (isSearching) {
                 Log.d(TAG, "setup: Updating view in response to vm.isSearchingPages")
-                binding.bookPageText.text = ""
+                binding.bodyText.text = ""
                 binding.loadingSpinner.visibility = View.VISIBLE
                 binding.loadingText.visibility = View.VISIBLE
                 binding.loadingText.text = "Searching Wikipedia..."
@@ -100,63 +100,64 @@ class EditBookPageActivity : AppCompatActivity() {
                 binding.loadingText.visibility = View.VISIBLE
                 binding.loadingText.text = "Loading details..."
 
-                binding.image.visibility = View.GONE
-                binding.bookPageTitleText.visibility = View.GONE
-                binding.bookPageText.visibility = View.GONE
+                hideTextAndIcons()
             } else {
                 Log.d(TAG, "setup: Updating view in response to !vm.isLoadingPage")
                 binding.loadingSpinner.visibility = View.GONE
                 binding.loadingText.visibility = View.GONE
 
-                binding.image.visibility = View.VISIBLE
-                binding.bookPageTitleText.visibility = View.VISIBLE
-                binding.bookPageText.visibility = View.VISIBLE
+                showTextAndIcons()
             }
         }
 
-        viewModel.pageText.observe(this) { binding.bookPageText.text = viewModel.text() }
+        viewModel.pageText.observe(this) { binding.bodyText.text = viewModel.text() }
 
-        viewModel.wikiPageText.observe(this) {
-            binding.bookPageText.text = viewModel.text()
+        viewModel.wikiPage.observe(this) { wikiPage ->
+            binding.bodyText.text = viewModel.text()
 
-            // No need to also do this for viewModel.pageText, because that can only happen if
-            // we were already displaying the editText view.
-            binding.editText.visibility = if (it.isNullOrEmpty()) View.GONE else View.VISIBLE
-        }
+            if (wikiPage == null) {
+                hideTextAndIcons()
+            } else {
+                showTextAndIcons()
+            }
 
-        viewModel.pageTitle.observe(this) {
-            binding.bookPageTitleText.text = viewModel.title()
-            binding.editTitle.visibility = if (it.isNullOrEmpty()) View.GONE else View.VISIBLE
-        }
-
-        viewModel.wikiPageTitle.observe(this) {
-            binding.bookPageTitleText.text = viewModel.title()
+            // Defensive so as to stop the auto complete prompt firing after the wiki page is
+            // fetched for the first time.
+            if (binding.titleInput.text.toString() != wikiPage?.title ?: "") {
+                binding.titleInput.setText(wikiPage?.title ?: "")
+            }
+            binding.titleText.text = viewModel.title()
 
             // The first time we add a new page, there is no "view in wiki" link in the menu.
             // Once we get a page title sorted out, we can then show this menu option.
             invalidateOptionsMenu()
         }
 
+        viewModel.pageTitle.observe(this) {
+            binding.titleText.text = viewModel.title()
+            binding.titleTextIcon.visibility = if (it.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+
         viewModel.mainImage.observe(this) { image ->
             if (image != null) {
                 Picasso.get()
-                    .load(image)
+                    .load(image.filename)
                     .fit()
                     .centerCrop()
-                    .into(binding.image)
-                binding.image.visibility = View.VISIBLE
+                    .into(binding.mainImage)
+                binding.mainImage.visibility = View.VISIBLE
             } else {
-                binding.image.visibility = View.GONE
+                binding.mainImage.visibility = View.GONE
             }
         }
 
-        binding.bookPageTitle.also {
-            it.setText(viewModel.wikiPageTitle.value)
+        binding.titleInput.also {
+            it.setText(viewModel.wikiPage.value?.title ?: "")
             it.setAdapter(AutocompleteAdapter())
 
             it.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
-                val newTitle = binding.bookPageTitle.text.toString()
-                viewModel.wikiPageTitle.value = newTitle
+                val newTitle = it.text.toString()
+                // viewModel.wikiPageTitle.value = newTitle // TODO: Will the autocomplete automatically populate the GUI widget? Or do we need to do that ourselves? If automatic, can probably just leave this as is.
                 if (newTitle.isNotEmpty()) {
                     lifecycleScope.launch {
                         if (!viewModel.preparePage(newTitle)) {
@@ -169,41 +170,45 @@ class EditBookPageActivity : AppCompatActivity() {
             }
         }
 
-        binding.editImageIcon.setOnClickListener {
+        binding.imageConfig.setOnClickListener {
 
-            val images = viewModel.allImages.value!!
+            val images = viewModel.allImages.value
+            val wikiPage = viewModel.wikiPage.value
 
-            if (images.size <= 1) {
-                val message = if (images.isEmpty()) {
-                    "No images found in the wiki page for \"${viewModel.wikiPageTitle.value}\""
+            if (images != null && wikiPage != null) {
+                if (images.size <= 1) {
+                    val message = if (images.isEmpty()) {
+                        "No images found in the wiki page for \"${wikiPage.title}\""
+                    } else {
+                        "Only one image found in the wiki page for \"${wikiPage.title}\""
+                    }
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                 } else {
-                    "Only one image found in the wiki page for \"${viewModel.wikiPageTitle.value}\""
-                }
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-            } else {
-                val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
-                view.images.layoutManager = GridLayoutManager(this, 3)
+                    val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
+                    view.images.layoutManager = GridLayoutManager(this, 3)
 
-                val alert = AlertDialog.Builder(this)
-                    .setView(view.root)
-                    .setPositiveButton("Close") { _, _ -> }
-                    .show()
+                    val alert = AlertDialog.Builder(this)
+                        .setView(view.root)
+                        .setPositiveButton("Close") { _, _ -> }
+                        .show()
 
-                view.images.adapter = SelectImageAdapter(images).also { adapter ->
-                    adapter.setImageSelectedListener { imageFile ->
-                        viewModel.mainImage.value = "file://${imageFile.absolutePath}"
-                        alert.dismiss()
-                        viewModel.save()
+                    view.images.adapter = SelectImageAdapter(images).also { adapter ->
+                        adapter.setImageSelectedListener { wikiImage ->
+                            viewModel.mainImage.value = wikiImage
+                            alert.dismiss()
+                            viewModel.save()
+                        }
                     }
                 }
             }
         }
 
-        binding.bookPageTitleText.setOnClickListener {
+        binding.titleText.setOnClickListener {
             val view = DialogPageTitleInputBinding.inflate(layoutInflater, null, false)
             view.titleInput.setText(viewModel.title())
-            if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {
-                view.originalTitle.text = "Original title on Wikipedia: ${viewModel.wikiPageTitle.value ?: "Unknown"}"
+            val wikiPageTitle = viewModel.wikiPage.value?.title
+            if (!wikiPageTitle.isNullOrEmpty()) {
+                view.originalTitle.text = "Original title on Wikipedia: $wikiPageTitle"
             } else {
                 view.originalTitle.visibility = View.GONE
             }
@@ -216,13 +221,14 @@ class EditBookPageActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.bookPageText.setOnClickListener {
+        binding.bodyText.setOnClickListener {
             val view = DialogPageTextInputBinding.inflate(layoutInflater, null, false)
             view.textInput.setText(viewModel.text())
-            if (viewModel.wikiPageTitle.value?.isNotEmpty() == true) {
-                view.originalText.setText(viewModel.wikiPageText.value ?: "")
+            val wikiPageText = viewModel.wikiPage.value?.text
+            if (!wikiPageText.isNullOrEmpty()) {
+                view.originalText.text = wikiPageText
                 view.originalText.setOnLongClickListener {
-                    view.textInput.setText(viewModel.wikiPageText.value ?: "")
+                    view.textInput.setText(wikiPageText)
                     true
                 }
             } else {
@@ -240,19 +246,41 @@ class EditBookPageActivity : AppCompatActivity() {
 
         viewModel.mainImage.value?.also { image ->
             Picasso.get()
-                .load(image)
+                .load(image.filename)
                 .fit()
                 .centerCrop()
-                .into(binding.image)
-            binding.image.visibility = View.VISIBLE
+                .into(binding.mainImage)
+            binding.mainImage.visibility = View.VISIBLE
         }
 
+    }
+
+    private fun showTextAndIcons() {
+        binding.titleText.visibility = View.VISIBLE
+        binding.titleTextIcon.visibility = View.VISIBLE
+
+        binding.imageConfig.visibility = View.VISIBLE
+        binding.imageConfigIcon.visibility = View.VISIBLE
+
+        binding.bodyText.visibility = View.VISIBLE
+        binding.bodyTextIcon.visibility = View.VISIBLE
+    }
+
+    private fun hideTextAndIcons() {
+        binding.titleText.visibility = View.GONE
+        binding.titleTextIcon.visibility = View.GONE
+
+        binding.imageConfig.visibility = View.GONE
+        binding.imageConfigIcon.visibility = View.GONE
+
+        binding.bodyText.visibility = View.GONE
+        binding.bodyTextIcon.visibility = View.GONE
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.view_in_wikipedia -> {
-                viewModel.wikiPageTitle.value?.also { title ->
+                viewModel.wikiPage.value?.title?.also { title ->
                     viewInWikipedia(this, title)
                 }
                 return true
@@ -290,7 +318,7 @@ class EditBookPageActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.edit_book_page_menu, menu)
 
-        val exists = viewModel.wikiPageTitle.value?.isNotEmpty() == true
+        val exists = viewModel.wikiPage.value != null
         menu.findItem(R.id.view_in_wikipedia).isVisible = exists
         menu.findItem(R.id.delete_page).isVisible = exists
 
@@ -337,6 +365,10 @@ class EditBookPageActivity : AppCompatActivity() {
         override fun getFilter() = object: Filter() {
 
             override fun performFiltering(constraint: CharSequence?): FilterResults {
+                if (constraint?.toString() ?: "" == viewModel.wikiPage.value?.title) {
+                    return FilterResults()
+                }
+
                 latestSearchTerms = constraint?.toString() ?: ""
                 Log.i("WikiSearch", "Recording that our last search was for: $latestSearchTerms")
                 val results = FilterResults()

@@ -7,99 +7,127 @@
     android:layout_height="match_parent"
     tools:context=".editbookpage.EditBookPageActivity">
 
-    <com.serwylo.babybook.DelayAutoCompleteTextView
-        android:id="@+id/book_page_title"
-        android:layout_width="0dp"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Wikipedia page title"
-        android:inputType="textCapWords"
-        android:selectAllOnFocus="true"
-        android:layout_margin="16dp"
-        app:layout_constraintEnd_toStartOf="@id/page_down"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/page_up" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/page_no_label"
-        android:text="Page"
-        tools:visibility="visible"
-        android:visibility="gone"
-        android:layout_margin="8dp"
-        android:paddingBottom="8dp"
-        app:layout_constraintStart_toStartOf="@id/page_up"
-        app:layout_constraintEnd_toEndOf="@id/page_down"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/page_up"/>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/page_down"
-        tools:visibility="visible"
-        android:visibility="gone"
-        style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-        app:icon="@drawable/ic_arrow_down"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintStart_toEndOf="@id/book_page_title"
-        app:layout_constraintEnd_toStartOf="@id/page_up"
-        app:layout_constraintTop_toTopOf="@id/page_up"
-        app:layout_constraintBottom_toBottomOf="@id/page_up"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/title_input_wrapper"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:hint="Wikipedia page title"
+                android:inputType="textCapWords"
+                app:endIconMode="none"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toStartOf="@id/page_down"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/page_up"
-        tools:visibility="visible"
-        android:visibility="gone"
-        style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-        app:icon="@drawable/ic_arrow_up"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintStart_toEndOf="@id/page_down"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_no_label" />
+                <com.serwylo.babybook.DelayAutoCompleteTextView
+                    android:id="@+id/title_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:selectAllOnFocus="true"
+                    android:background="@null"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/page_no_label"
+                android:text="Page"
+                tools:visibility="visible"
+                android:visibility="gone"
+                android:layout_margin="6dp"
+                app:layout_constraintStart_toStartOf="@id/page_up"
+                app:layout_constraintEnd_toEndOf="@id/page_down"
+                app:layout_constraintTop_toBottomOf="@id/page_down" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:id="@+id/page_down"
+                tools:visibility="visible"
+                app:iconSize="18dp"
+                android:layout_marginTop="4dp"
+                android:padding="8dp"
+                android:visibility="gone"
+                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                app:icon="@drawable/ic_arrow_down"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintStart_toEndOf="@id/title_input_wrapper"
+                app:layout_constraintEnd_toStartOf="@id/page_up"
+                app:layout_constraintTop_toTopOf="@id/title_input_wrapper" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:id="@+id/page_up"
+                app:iconSize="18dp"
+                android:layout_marginTop="4dp"
+                android:padding="8dp"
+                tools:visibility="visible"
+                android:visibility="gone"
+                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                app:icon="@drawable/ic_arrow_up"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintStart_toEndOf="@id/page_down"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/title_input_wrapper" />
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/loading_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Searching Wikipedia..."
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@id/book_page_title"
-        app:layout_constraintEnd_toEndOf="@id/book_page_title"
-        android:alpha="0.5" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/loading_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Searching Wikipedia..."
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_margin="2dp"
+                app:layout_constraintBottom_toBottomOf="@id/title_input_wrapper"
+                app:layout_constraintEnd_toEndOf="@id/title_input_wrapper"
+                android:alpha="0.5" />
 
 
-    <ProgressBar
-        android:id="@+id/loading_spinner"
-        android:layout_width="32dp"
-        android:layout_height="0dp"
-        android:padding="4dp"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@id/book_page_title"
-        app:layout_constraintTop_toTopOf="@id/book_page_title"
-        app:layout_constraintBottom_toBottomOf="@id/book_page_title" />
+            <ProgressBar
+                android:id="@+id/loading_spinner"
+                android:layout_width="32dp"
+                android:layout_height="0dp"
+                android:padding="4dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintEnd_toEndOf="@id/title_input_wrapper"
+                app:layout_constraintTop_toTopOf="@id/title_input_wrapper"
+                app:layout_constraintBottom_toBottomOf="@id/title_input_wrapper" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image"
+        android:id="@+id/main_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         tools:src="@tools:sample/backgrounds/scenic"
         android:scaleType="center"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/page_up"
+        app:layout_constraintTop_toBottomOf="@id/card"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/book_page_text"
+        android:id="@+id/body_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="A bug is a thing which is cool to look at and fun to watch. Sometimes they are in the back yard. Sometimes they are in the park."
@@ -117,7 +145,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/edit_text"
+        android:id="@+id/body_text_icon"
         android:layout_width="42dp"
         android:layout_height="0dp"
         android:scaleType="fitCenter"
@@ -126,13 +154,13 @@
         android:background="#33000000"
         tools:visibility="visible"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/book_page_text"
-        app:layout_constraintEnd_toEndOf="@id/book_page_text"
-        app:layout_constraintBottom_toBottomOf="@id/book_page_text"
+        app:layout_constraintTop_toTopOf="@id/body_text"
+        app:layout_constraintEnd_toEndOf="@id/body_text"
+        app:layout_constraintBottom_toBottomOf="@id/body_text"
         />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/edit_image_icon"
+        android:id="@+id/image_config"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="#88ffffff"
@@ -147,25 +175,25 @@
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_up"
+        app:layout_constraintTop_toTopOf="@id/main_image"
         app:layout_constraintWidth_max="wrap"
         />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/edit_image"
+        android:id="@+id/image_config_icon"
         android:layout_width="42dp"
         android:layout_height="0dp"
         android:scaleType="fitCenter"
         android:padding="8dp"
         android:src="@drawable/ic_edit"
         android:background="#33000000"
-        app:layout_constraintEnd_toEndOf="@id/edit_image_icon"
-        app:layout_constraintTop_toTopOf="@id/edit_image_icon"
-        app:layout_constraintBottom_toBottomOf="@id/edit_image_icon"
+        app:layout_constraintEnd_toEndOf="@id/image_config"
+        app:layout_constraintTop_toTopOf="@id/image_config"
+        app:layout_constraintBottom_toBottomOf="@id/image_config"
         />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/book_page_title_text"
+        android:id="@+id/title_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="#88ffffff"
@@ -180,12 +208,12 @@
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_up"
+        app:layout_constraintTop_toTopOf="@id/main_image"
         app:layout_constraintWidth_max="wrap"
         />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/edit_title"
+        android:id="@+id/title_text_icon"
         android:layout_width="42dp"
         android:layout_height="0dp"
         android:scaleType="fitCenter"
@@ -194,9 +222,9 @@
         android:background="#33000000"
         tools:visibility="visible"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/book_page_title_text"
-        app:layout_constraintTop_toTopOf="@id/book_page_title_text"
-        app:layout_constraintBottom_toBottomOf="@id/book_page_title_text"
+        app:layout_constraintEnd_toEndOf="@id/title_text"
+        app:layout_constraintTop_toTopOf="@id/title_text"
+        app:layout_constraintBottom_toBottomOf="@id/title_text"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

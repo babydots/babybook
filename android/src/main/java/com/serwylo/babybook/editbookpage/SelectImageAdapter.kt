@@ -12,14 +12,15 @@ import com.serwylo.babybook.databinding.DialogPageImageSelectorBinding
 import com.serwylo.babybook.databinding.DialogPageImageSelectorItemBinding
 import com.serwylo.babybook.databinding.EditBookPageItemBinding
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.entities.WikiImage
 import com.squareup.picasso.Picasso
 import java.io.File
 
-class SelectImageAdapter(private val values: List<File>): RecyclerView.Adapter<SelectImageAdapter.ViewHolder>() {
+class SelectImageAdapter(private val values: List<WikiImage>): RecyclerView.Adapter<SelectImageAdapter.ViewHolder>() {
 
-    private var imageSelectedListener: ((image: File) -> Unit)? = null
+    private var imageSelectedListener: ((image: WikiImage) -> Unit)? = null
 
-    fun setImageSelectedListener(listener: (image: File) -> Unit) {
+    fun setImageSelectedListener(listener: (image: WikiImage) -> Unit) {
         this.imageSelectedListener = listener
     }
 
@@ -30,9 +31,9 @@ class SelectImageAdapter(private val values: List<File>): RecyclerView.Adapter<S
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val image = values[position]
 
-        Log.d(TAG, "onBindViewHolder: Loading image file://${image.absolutePath}")
+        Log.d(TAG, "onBindViewHolder: Loading image ${image.filename}")
         Picasso.get()
-            .load("file://${image.absolutePath}")
+            .load(image.filename)
             .fit()
             .centerCrop()
             .into(holder.image)

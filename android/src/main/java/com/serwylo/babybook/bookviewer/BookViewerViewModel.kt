@@ -10,18 +10,19 @@ class BookViewerViewModel(
     bookId: Long
 ) : ViewModel() {
 
-    val bookWithPages = repository.getBookWithPages(bookId)
+    val book = repository.getBookLive(bookId)
+    val pages = repository.getFullPages(bookId)
 
     var currentPageIndex: MutableLiveData<Int> = MutableLiveData(0)
 
-    fun currentPage() = bookWithPages.value?.pages?.get(currentPageIndex.value!!)
+    fun currentPage() = pages.value?.get(currentPageIndex.value!!)
 
-    fun hasNextPage() = currentPageIndex.value!! < (bookWithPages.value?.pages?.size ?: 0) - 1
+    fun hasNextPage() = currentPageIndex.value!! < (pages.value?.size ?: 0) - 1
     fun hasPreviousPage() = currentPageIndex.value!! > 0
 
     fun turnToNextPage() {
         currentPageIndex.value?.also { index ->
-            bookWithPages.value?.pages?.size?.also { pagesSize ->
+            pages.value?.size?.also { pagesSize ->
                 if (index < pagesSize - 1) {
                     currentPageIndex.value = index + 1
                 }
@@ -38,7 +39,7 @@ class BookViewerViewModel(
     }
 
     fun pageCount(): Int {
-        return bookWithPages.value?.pages?.size ?: 0
+        return pages.value?.size ?: 0
     }
 
 }

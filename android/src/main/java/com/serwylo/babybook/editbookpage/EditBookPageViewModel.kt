@@ -6,26 +6,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.entities.WikiImage
+import com.serwylo.babybook.db.entities.WikiPage
 import com.serwylo.babybook.db.repositories.BookRepository
-import com.serwylo.babybook.mediawiki.downloadImages
+import com.serwylo.babybook.mediawiki.downloadWikiImage
 import com.serwylo.babybook.mediawiki.loadWikiPage
-import com.serwylo.babybook.mediawiki.processTitle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 
 class EditBookPageViewModel(private val repository: BookRepository, private val filesDir: File, val bookId: Long, private val existingBookPageId: Long): ViewModel() {
 
     private var bookPageId = existingBookPageId
 
-    val wikiPageTitle = MutableLiveData("")
     val pageTitle = MutableLiveData<String?>(null)
-    val wikiPageText = MutableLiveData("")
     val pageText = MutableLiveData<String?>(null)
     val pageNumber = MutableLiveData(0)
-    val mainImage = MutableLiveData<String?>(null)
-    val allImages = MutableLiveData(listOf<File>())
+
+    val wikiPage = MutableLiveData<WikiPage?>(null)
+    val mainImage = MutableLiveData<WikiImage?>(null)
+    val allImages = MutableLiveData(listOf<WikiImage>())
 
     val isLoading = MutableLiveData(false)
     val isSearchingPages = MutableLiveData(false)
@@ -34,21 +33,29 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
     init {
         viewModelScope.launch {
             if (existingBookPageId > 0) {
-                val page = repository.getBookPage(existingBookPageId)
-                wikiPageTitle.value = page.wikiPageTitle
-                pageTitle.value = page.pageTitle
-                wikiPageText.value = page.wikiPageText
-                pageText.value = page.pageText
-                pageNumber.value = page.pageNumber
-                mainImage.value = page.imagePath
+                val bookPage = repository.getBookPage(existingBookPageId)
+
+                pageTitle.value = bookPage.title
+                pageText.value = bookPage.text
+                pageNumber.value = bookPage.pageNumber
+
+                bookPage.wikiPageId?.also { wikiPageId ->
+                    val page = repository.getWikiPage(wikiPageId)
+                    wikiPage.value = page
+                    allImages.value = withContext(Dispatchers.IO) { repository.getWikiImages(page) }
+
+                    bookPage.wikiImageId?.also { wikiImageId ->
+                        mainImage.value = withContext(Dispatchers.IO) { repository.getWikiImage(wikiImageId) }
+                    }
+                }
             }
 
             isLoading.value = false
         }
     }
 
-    fun title() = pageTitle.value ?: wikiPageTitle.value ?: ""
-    fun text() = pageText.value ?: wikiPageText.value ?: ""
+    fun title() = pageTitle.value ?: wikiPage.value?.title ?: ""
+    fun text() = pageText.value ?: wikiPage.value?.text ?: ""
 
     fun movePageUp() {
         val currentId = bookPageId
@@ -73,44 +80,91 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
     }
 
 
-    suspend fun preparePage(title: String): Boolean = withContext(Dispatchers.Main) {
+    suspend fun preparePage(title: String): Boolean = withContext(Dispatchers.IO) {
         Log.d(TAG, "preparePage: Getting ready to fetch wiki data")
-        isPreparingPage.value = true
+        withContext(Dispatchers.Main) { isPreparingPage.value = true }
 
         try {
-            pageTitle.value = processTitle(title)
+            val existingWikiPage = repository.findWikiPageByTitle(title)
+            if (existingWikiPage != null) {
+                withContext(Dispatchers.Main) {
+                    wikiPage.value = existingWikiPage
+                    pageTitle.value = null
+                    pageText.value = null
+                }
 
-            val dir = File(filesDir, title)
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
+                val images = repository.getWikiImages(existingWikiPage)
 
-            val details = loadWikiPage(title, dir)
-            wikiPageText.value = details.parseParagraphs().firstOrNull() ?: ""
-            val initialSaveJob = save()
-
-            val imageNames = details.getImageNamesOfInterest()
-            if (imageNames.isNotEmpty()) {
-                val images = downloadImages(details.getImageNamesOfInterest(), dir)
-                allImages.value = images
-                images.firstOrNull()?.also { image ->
-                    mainImage.value = "file://${image.absolutePath}"
+                withContext(Dispatchers.Main) {
+                    mainImage.value = images.firstOrNull()
+                    allImages.value = images
                 }
             } else {
-                allImages.value = listOf()
-                mainImage.value = null
-            }
+                Log.d(TAG, "preparePage: Page does not yet exist in our local DB, will fetch it.")
+                val dir = File(filesDir, title)
+                if (!dir.exists()) {
+                    dir.mkdirs()
+                }
 
-            // If we already have cached images, then the above fetching will be faster than saving
-            // the record to the database. Hence, we wait for the save to comlete.
-            initialSaveJob.join()
-            save()
+                val details = loadWikiPage(title, dir)
+
+                Log.d(TAG, "preparePage: Wikipedia page details loaded, will save to DB.")
+                val newWikiPage = repository.addNewWikiPage(title, details.parseParagraphs().firstOrNull() ?: "")
+
+                withContext(Dispatchers.Main) {
+                    wikiPage.value = newWikiPage
+                    pageTitle.value = null
+                    pageText.value = null
+                }
+
+                Log.d(TAG, "preparePage: Saving book page to DB now that we have wiki page details.")
+                val initialSaveJob = save()
+
+                val imageNames = details.getImageNamesOfInterest()
+
+                Log.d(TAG, "preparePage: Ensuring all ${imageNames.size} images are available.")
+                if (imageNames.isNotEmpty()) {
+                    val images: List<WikiImage> = imageNames.map { filename ->
+                        async(Dispatchers.IO) {
+                            val existingWikiImage = repository.findWikiImageByName(filename)
+                            if (existingWikiImage != null) {
+                                Log.d(TAG, "preparePage: Ignoring $filename because we already have a local copy saved.")
+                                existingWikiImage
+                            } else {
+                                Log.d(TAG, "preparePage: Downloading $filename and saving metadata to our local DB.")
+                                val file = downloadWikiImage(filename, dir)
+                                repository.addNewWikiImage(newWikiPage, filename, file)
+                            }
+                        }
+                    }.awaitAll()
+
+                    withContext(Dispatchers.Main) {
+                        allImages.value = images
+                        mainImage.value = images.firstOrNull()
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        allImages.value = listOf()
+                        mainImage.value = null
+                    }
+                }
+
+                // If we already have cached images, then the above fetching will be faster than saving
+                // the record to the database. Hence, we wait for the save to comlete.
+                initialSaveJob.join()
+
+                Log.d(TAG, "preparePage: Saving book page again now that we know about its images.")
+                save()
+            }
 
             return@withContext true
         } catch (e: Throwable) {
+            Log.e(TAG, "preparePage: Error fetching wiki data: $e", e)
             return@withContext false
         } finally {
-            isPreparingPage.value = false
+            withContext(Dispatchers.Main) {
+                isPreparingPage.value = false
+            }
         }
     }
 
@@ -129,13 +183,13 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
             Log.d(TAG, "save: Updating existing book page")
             val page = BookPage(
                 pageNumber = pageNumber.value!!,
-                wikiPageTitle = wikiPageTitle.value ?: "",
-                wikiPageText = wikiPageText.value ?: "",
-                pageTitle = pageTitle.value,
-                pageText = pageText.value,
+                text = pageText.value,
+                title = pageTitle.value,
                 bookId = bookId,
-                imagePath = mainImage.value
-            ).apply { id = bookPageId }
+                wikiImageId = mainImage.value?.id,
+                wikiPageId = wikiPage.value?.id,
+                id = bookPageId,
+            )
 
             repository.updateBookPage(page)
         } else {
@@ -143,12 +197,11 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
             val newPageNumber = repository.getNextPageNumber(bookId)
             val page = BookPage(
                 pageNumber = repository.getNextPageNumber(bookId),
-                wikiPageTitle = wikiPageTitle.value ?: "",
-                wikiPageText = wikiPageText.value ?: "",
-                pageTitle = pageTitle.value,
-                pageText = pageText.value,
+                text = pageText.value,
+                title = pageTitle.value,
                 bookId = bookId,
-                imagePath = mainImage.value
+                wikiImageId = mainImage.value?.id,
+                wikiPageId = wikiPage.value?.id,
             )
 
             bookPageId = repository.addNewBookPage(page)

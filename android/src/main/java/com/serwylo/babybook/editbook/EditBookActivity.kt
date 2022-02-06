@@ -17,7 +17,6 @@ import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.editbookpage.EditBookPageActivity
-import com.serwylo.babybook.editbookpage.SelectImageAdapter
 import kotlinx.coroutines.launch
 
 
@@ -98,7 +97,7 @@ class EditBookActivity : AppCompatActivity() {
             adapter.setPageSelectedListener { page ->
                 startActivity(Intent(this, EditBookPageActivity::class.java).apply {
                     putExtra(EditBookPageActivity.EXTRA_BOOK_ID, viewModel.getBookId())
-                    putExtra(EditBookPageActivity.EXTRA_BOOK_PAGE_ID, page.id)
+                    putExtra(EditBookPageActivity.EXTRA_BOOK_PAGE_ID, page.bookPage.id)
                 })
             }
 

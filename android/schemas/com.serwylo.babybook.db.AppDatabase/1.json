@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "cdd4b386fa5b9bc8af326bf4e4980d2c",
+    "identityHash": "72a345dadad8ff95b8adf6354d206c89",
     "entities": [
       {
         "tableName": "Book",
@@ -32,7 +32,7 @@
       },
       {
         "tableName": "BookPage",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `pageNumber` INTEGER NOT NULL, `wikiPageTitle` TEXT, `pageTitle` TEXT, `imagePath` TEXT, `wikiPageText` TEXT, `pageText` TEXT, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `Book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `pageNumber` INTEGER NOT NULL, `title` TEXT, `text` TEXT, `wikiImageId` INTEGER, `wikiPageId` INTEGER, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `Book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`bookId`) REFERENCES `WikiPage`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "bookId",
@@ -47,33 +47,27 @@
             "notNull": true
           },
           {
-            "fieldPath": "wikiPageTitle",
-            "columnName": "wikiPageTitle",
+            "fieldPath": "title",
+            "columnName": "title",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "pageTitle",
-            "columnName": "pageTitle",
+            "fieldPath": "text",
+            "columnName": "text",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "imagePath",
-            "columnName": "imagePath",
-            "affinity": "TEXT",
+            "fieldPath": "wikiImageId",
+            "columnName": "wikiImageId",
+            "affinity": "INTEGER",
             "notNull": false
           },
           {
-            "fieldPath": "wikiPageText",
-            "columnName": "wikiPageText",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "pageText",
-            "columnName": "pageText",
-            "affinity": "TEXT",
+            "fieldPath": "wikiPageId",
+            "columnName": "wikiPageId",
+            "affinity": "INTEGER",
             "notNull": false
           },
           {
@@ -101,28 +95,27 @@
             "referencedColumns": [
               "id"
             ]
+          },
+          {
+            "table": "WikiPage",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "bookId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
           }
         ]
       },
       {
         "tableName": "WikiPage",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `imagePath` TEXT NOT NULL, `text` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL, `text` TEXT NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "title",
             "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "imagePath",
-            "columnName": "imagePath",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -131,22 +124,72 @@
             "columnName": "text",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
             "id"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "WikiImage",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`filename` TEXT NOT NULL, `wikiPageId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`wikiPageId`) REFERENCES `WikiPage`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "filename",
+            "columnName": "filename",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wikiPageId",
+            "columnName": "wikiPageId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "WikiPage",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "wikiPageId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cdd4b386fa5b9bc8af326bf4e4980d2c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '72a345dadad8ff95b8adf6354d206c89')"
     ]
   }
 }

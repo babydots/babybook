@@ -7,10 +7,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.serwylo.babybook.R
-import com.serwylo.babybook.editbook.EditBookActivity
 import com.serwylo.babybook.bookviewer.BookViewerActivity
 import com.serwylo.babybook.databinding.FragmentBookListBinding
+import com.serwylo.babybook.editbook.EditBookActivity
 
 class BookListFragment : Fragment() {
 

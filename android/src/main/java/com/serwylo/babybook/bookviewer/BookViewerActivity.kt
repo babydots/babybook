@@ -18,11 +18,13 @@ import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.entities.PageEditingData
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
 
@@ -61,9 +63,9 @@ class BookViewerActivity : AppCompatActivity() {
                 return true
             }*/
             R.id.view_in_wikipedia -> {
-                viewModel.currentPage()?.wikiPageTitle?.also { title ->
+                /*viewModel.currentPage()?.wikiPageTitle?.also { title ->
                     viewInWikipedia(this, title)
-                }
+                }*/
                 return true
             }
             R.id.pdf -> {
@@ -82,7 +84,7 @@ class BookViewerActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/pdf"
-            putExtra(Intent.EXTRA_TITLE, "${viewModel.bookWithPages.value?.book?.title}.pdf")
+            putExtra(Intent.EXTRA_TITLE, "${viewModel.book.value?.title}.pdf")
         }
         startActivityForResult(intent, RESULT_CREATE_FILE)
     }
@@ -111,6 +113,7 @@ class BookViewerActivity : AppCompatActivity() {
     }
 
     private suspend fun exportPdf(outputStream: OutputStream) {
+        /*
         viewModel.bookWithPages.value?.also { bookWithPages ->
             val pages = bookWithPages.pages.map {
                 val file = it.imageFile(this)
@@ -128,14 +131,17 @@ class BookViewerActivity : AppCompatActivity() {
 
             pdfFile.inputStream().use { it.copyTo(outputStream) }
         }
+        */
     }
 
     private fun setup(binding: ActivityBookViewerBinding) {
 
-        viewModel.bookWithPages.observe(this) { value ->
-            supportActionBar?.title = value.book.title
+        viewModel.book.observe(this) { book ->
+            supportActionBar?.title = book.title
+        }
 
-            val firstPage = value.pages.firstOrNull()
+        viewModel.pages.observe(this) { pages ->
+            val firstPage = pages.firstOrNull()
             if (firstPage == null) {
                 Toast.makeText(this, "This book does not have any pages yet.", Toast.LENGTH_SHORT).show()
                 finish()
@@ -152,27 +158,32 @@ class BookViewerActivity : AppCompatActivity() {
             // currentPageIndex value of 0 in this observer, prior to loading the page data from
             // the database. If so, just ignore it (the actual first page render will be triggered
             // by the observer on viewModel.bookWithPages).
-            val pages = viewModel.bookWithPages.value?.pages
+            val pages = viewModel.pages.value
             if (pages != null && pages.size > currentPage) {
                 showPage(pages[currentPage])
             }
         }
     }
 
-    private fun showPage(page: BookPage) {
+    private fun showPage(page: PageEditingData) {
 
         binding.previous.visibility = if (viewModel.hasPreviousPage()) View.VISIBLE else View.GONE
         binding.next.visibility = if (viewModel.hasNextPage()) View.VISIBLE else View.GONE
 
-        if (page.imagePath == null) {
+        if (page.image == null) {
             binding.image.visibility = View.GONE
         } else {
             binding.image.visibility = View.VISIBLE
-            Picasso.get()
-                .load(page.imagePath)
-                .fit()
-                .centerCrop()
-                .into(binding.image)
+            lifecycleScope.launch {
+                val image = page.image(this@BookViewerActivity)
+                if (image != null) {
+                    Picasso.get()
+                        .load(image)
+                        .fit()
+                        .centerCrop()
+                        .into(binding.image)
+                }
+            }
         }
 
         binding.title.text = page.title()
