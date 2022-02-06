@@ -17,6 +17,7 @@ import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.editbookpage.EditBookPageActivity
+import com.serwylo.babybook.editbookpage.SelectImageAdapter
 import kotlinx.coroutines.launch
 
 
