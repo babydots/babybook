@@ -131,6 +131,39 @@
         app:layout_constraintBottom_toBottomOf="@id/book_page_text"
         />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/edit_image_icon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#88ffffff"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_image"
+        android:textSize="32sp"
+        android:textColor="@color/black"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingEnd="50dp"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/page_up"
+        app:layout_constraintWidth_max="wrap"
+        />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/edit_image"
+        android:layout_width="42dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        android:padding="8dp"
+        android:src="@drawable/ic_edit"
+        android:background="#33000000"
+        app:layout_constraintEnd_toEndOf="@id/edit_image_icon"
+        app:layout_constraintTop_toTopOf="@id/edit_image_icon"
+        app:layout_constraintBottom_toBottomOf="@id/edit_image_icon"
+        />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/book_page_title_text"
         android:layout_width="0dp"

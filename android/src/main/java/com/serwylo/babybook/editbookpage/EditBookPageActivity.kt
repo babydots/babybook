@@ -14,9 +14,11 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.serwylo.babybook.R
 import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
+import com.serwylo.babybook.databinding.DialogPageImageSelectorBinding
 import com.serwylo.babybook.databinding.DialogPageTextInputBinding
 import com.serwylo.babybook.databinding.DialogPageTitleInputBinding
 import com.serwylo.babybook.db.AppDatabase
@@ -163,6 +165,36 @@ class EditBookPageActivity : AppCompatActivity() {
                     }
                 } else {
                     viewModel.clearPage()
+                }
+            }
+        }
+
+        binding.editImageIcon.setOnClickListener {
+
+            val images = viewModel.allImages.value!!
+
+            if (images.size <= 1) {
+                val message = if (images.isEmpty()) {
+                    "No images found in the wiki page for \"${viewModel.wikiPageTitle.value}\""
+                } else {
+                    "Only one image found in the wiki page for \"${viewModel.wikiPageTitle.value}\""
+                }
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            } else {
+                val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
+                view.images.layoutManager = GridLayoutManager(this, 3)
+
+                val alert = AlertDialog.Builder(this)
+                    .setView(view.root)
+                    .setPositiveButton("Close") { _, _ -> }
+                    .show()
+
+                view.images.adapter = SelectImageAdapter(images).also { adapter ->
+                    adapter.setImageSelectedListener { imageFile ->
+                        viewModel.mainImage.value = "file://${imageFile.absolutePath}"
+                        alert.dismiss()
+                        viewModel.save()
+                    }
                 }
             }
         }
