@@ -23,3 +23,4 @@ if (!hasProperty('excludeAndroid')) {
 include ':library'
 include ':web'
 include ':client'
+include ':cli'
