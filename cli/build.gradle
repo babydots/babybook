@@ -1,0 +1,41 @@
+plugins {
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+
+    implementation project(":library")
+
+    implementation "org.jetbrains.kotlinx:kotlinx-cli:0.3.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
+
+}
+
+project.ext.mainClassName = "com.serwylo.babybook.web.CliKt"
+
+task run(dependsOn: classes, type: JavaExec) {
+    main = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    ignoreExitValue = true
+}
+
+task dist(type: Jar) {
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+    duplicatesStrategy("exclude")
+    dependsOn [
+            configurations.runtimeClasspath,
+            classes,
+    ]
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
