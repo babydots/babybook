@@ -3,6 +3,7 @@ package com.serwylo.babybook
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import kotlinx.coroutines.*
 
 /**
@@ -11,7 +12,7 @@ import kotlinx.coroutines.*
  *
  * Doesn't use [JvmOverloads] due to this issue: https://medium.com/@mmlodawski/https-medium-com-mmlodawski-do-not-always-trust-jvmoverloads-5251f1ad2cfe
  */
-class DelayAutoCompleteTextView: AppCompatAutoCompleteTextView {
+class DelayAutoCompleteTextView: MaterialAutoCompleteTextView {
 
     constructor(context: Context) : super(context) {
         autoCompleteDelay = DEFAULT_AUTOCOMPLETE_DELAY

@@ -7,16 +7,16 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.serwylo.babybook.databinding.EditBookPageItemBinding
-import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.entities.PageEditingData
 import com.squareup.picasso.Picasso
 
 class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder>() {
 
-    private var values: List<BookPage> = listOf()
+    private var values: List<PageEditingData> = listOf()
 
-    private var pageSelectedListener: ((page: BookPage) -> Unit)? = null
+    private var pageSelectedListener: ((page: PageEditingData) -> Unit)? = null
 
-    fun setPageSelectedListener(listener: (page: BookPage) -> Unit) {
+    fun setPageSelectedListener(listener: (page: PageEditingData) -> Unit) {
         this.pageSelectedListener = listener
     }
 
@@ -27,12 +27,12 @@ class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val page = values[position]
         holder.titleView.text = page.title()
-        if (page.imagePath == null) {
+        if (page.image == null) {
             holder.imageView.visibility = View.GONE
         } else {
             holder.imageView.visibility = View.VISIBLE
             Picasso.get()
-                .load(page.imagePath)
+                .load(page.image.filename)
                 .fit()
                 .centerCrop()
                 .into(holder.imageView)
@@ -42,7 +42,7 @@ class EditBookPagesAdapter: RecyclerView.Adapter<EditBookPagesAdapter.ViewHolder
 
     override fun getItemCount(): Int = values.size
 
-    fun setData(pages: List<BookPage>?) {
+    fun setData(pages: List<PageEditingData>?) {
         values = pages ?: listOf()
     }
 

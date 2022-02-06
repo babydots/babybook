@@ -2,7 +2,7 @@ package com.serwylo.babybook.editbook
 
 import androidx.lifecycle.*
 import com.serwylo.babybook.db.entities.Book
-import com.serwylo.babybook.db.entities.BookPage
+import com.serwylo.babybook.db.entities.PageEditingData
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.utils.debounce
 import kotlinx.coroutines.launch
@@ -15,7 +15,7 @@ class EditBookViewModel(
     private val _bookTitle: MutableLiveData<String> = MutableLiveData("")
     val bookTitle: LiveData<String> = _bookTitle
 
-    lateinit var pages: LiveData<List<BookPage>>
+    lateinit var pages: LiveData<List<PageEditingData>>
 
     private val _isLoading: MutableLiveData<Boolean> = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -32,7 +32,7 @@ class EditBookViewModel(
                 repository.addNewBook()
             }
 
-            pages = repository.getBookPages(book)
+            pages = repository.getFullPages(book.id)
             _bookTitle.value = book.title
             _isLoading.value = false
         }

@@ -1,15 +1,11 @@
 package com.serwylo.babybook.db.repositories
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
 import com.serwylo.babybook.db.daos.BookDao
-import com.serwylo.babybook.db.entities.Book
-import com.serwylo.babybook.db.entities.BookPage
-import com.serwylo.babybook.db.entities.BookWithCoverPage
-import com.serwylo.babybook.db.entities.BookWithPages
+import com.serwylo.babybook.db.entities.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class BookRepository(private val dao: BookDao) {
 
@@ -50,6 +46,10 @@ class BookRepository(private val dao: BookDao) {
         dao.update(page)
     }
 
+    fun getBookLive(bookId: Long): LiveData<Book> = dao.getBookLive(bookId)
+
+    fun getFullPages(bookId: Long): LiveData<List<PageEditingData>> = dao.getPageEditingData(bookId)
+
     suspend fun getBook(bookId: Long): Book = withContext(Dispatchers.IO) {
         dao.getBook(bookId)
     }
@@ -67,8 +67,8 @@ class BookRepository(private val dao: BookDao) {
 
         val nextPage = dao.getPageNumber(currentPage.pageNumber + 1) ?: return@withContext currentPage.pageNumber
 
-        dao.update(currentPage.copy(pageNumber = currentPage.pageNumber + 1).apply { id = currentPage.id })
-        dao.update(nextPage.copy(pageNumber = nextPage.pageNumber - 1).apply { id = nextPage.id })
+        dao.update(currentPage.copy(id = currentPage.id, pageNumber = currentPage.pageNumber + 1))
+        dao.update(nextPage.copy(id = nextPage.id, pageNumber = nextPage.pageNumber - 1))
 
         currentPage.pageNumber + 1
     }
@@ -81,14 +81,42 @@ class BookRepository(private val dao: BookDao) {
 
         val previousPage = dao.getPageNumber(currentPage.pageNumber - 1) ?: return@withContext currentPage.pageNumber
 
-        dao.update(currentPage.copy(pageNumber = currentPage.pageNumber - 1).apply { id = currentPage.id })
-        dao.update(previousPage.copy(pageNumber = previousPage.pageNumber + 1).apply { id = previousPage.id })
+        dao.update(currentPage.copy(id = currentPage.id, pageNumber = currentPage.pageNumber - 1))
+        dao.update(previousPage.copy(id = previousPage.id, pageNumber = previousPage.pageNumber + 1))
 
         currentPage.pageNumber - 1
     }
 
     suspend fun getNextPageNumber(bookId: Long): Int = withContext(Dispatchers.IO) {
         dao.countPages(bookId) + 1
+    }
+
+    fun findWikiPageByTitle(title: String): WikiPage? = dao.findWikiPageByTitle(title)
+
+    fun findWikiImageByName(filename: String): WikiImage? = dao.findWikiImageByName(filename)
+
+    suspend fun addNewWikiPage(title: String, text: String): WikiPage = withContext(Dispatchers.IO) {
+        val page = WikiPage(title, text)
+        val id = dao.insert(page)
+        page.copy(id = id)
+    }
+
+    suspend fun addNewWikiImage(parentPage: WikiPage, filename: String, file: File): WikiImage = withContext(Dispatchers.IO) {
+        val image = WikiImage(/*name = filename,*/ filename = "file://${file.absolutePath}", wikiPageId = parentPage.id)
+        val id = dao.insert(image)
+        image.copy(id = id)
+    }
+
+    suspend fun getWikiPage(wikiPageId: Long): WikiPage {
+        return dao.getWikiPage(wikiPageId)
+    }
+
+    suspend fun getWikiImage(wikiImageId: Long): WikiImage {
+        return dao.getWikiImage(wikiImageId)
+    }
+
+    suspend fun getWikiImages(wikiPage: WikiPage): List<WikiImage> {
+        return dao.getWikiImages(wikiPage.id)
     }
 
 }

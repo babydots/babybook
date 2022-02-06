@@ -16,13 +16,12 @@ dependencies {
 
 }
 
-project.ext.mainClassName = "com.serwylo.babybook.web.CliKt"
+project.ext.mainClassName = "com.serwylo.babybook.cli.ApplicationKt"
 
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
-    ignoreExitValue = true
 }
 
 task dist(type: Jar) {

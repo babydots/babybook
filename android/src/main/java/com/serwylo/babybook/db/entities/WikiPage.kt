@@ -5,8 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class WikiPage(
-    @PrimaryKey val id: Int,
     val title: String,
-    val imagePath: String,
     val text: String,
+
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
 )
