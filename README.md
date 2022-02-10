@@ -25,6 +25,12 @@ Please report any issues or suggest features on the [issue tracker](https://gith
 
 Pull requests will be warmly received at [https://github.com/babydots/babybook](https://github.com/babydots/babybook).
 
+## Download
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.serwylo.babybook/)
+
 ## Compiling
 
 This app uses a typical `gradle` folder structure and is written in Kotlin.
