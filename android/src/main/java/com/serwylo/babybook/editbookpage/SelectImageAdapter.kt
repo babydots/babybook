@@ -2,21 +2,14 @@ package com.serwylo.babybook.editbookpage
 
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.serwylo.babybook.databinding.DialogPageImageSelectorBinding
 import com.serwylo.babybook.databinding.DialogPageImageSelectorItemBinding
-import com.serwylo.babybook.databinding.EditBookPageItemBinding
-import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.db.entities.WikiImage
 import com.squareup.picasso.Picasso
-import java.io.File
 
-class SelectImageAdapter(private val values: List<WikiImage>): RecyclerView.Adapter<SelectImageAdapter.ViewHolder>() {
+class SelectImageAdapter(private var values: List<WikiImage>): RecyclerView.Adapter<SelectImageAdapter.ViewHolder>() {
 
     private var imageSelectedListener: ((image: WikiImage) -> Unit)? = null
 
@@ -44,6 +37,11 @@ class SelectImageAdapter(private val values: List<WikiImage>): RecyclerView.Adap
     }
 
     override fun getItemCount(): Int = values.size
+
+    fun setImages(images: List<WikiImage>) {
+        values = images
+        notifyDataSetChanged()
+    }
 
     inner class ViewHolder(binding: DialogPageImageSelectorItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val image: AppCompatImageView = binding.image

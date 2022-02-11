@@ -102,7 +102,7 @@ class BookRepository(private val dao: BookDao) {
     }
 
     suspend fun addNewWikiImage(parentPage: WikiPage, filename: String, file: File): WikiImage = withContext(Dispatchers.IO) {
-        val image = WikiImage(/*name = filename,*/ filename = "file://${file.absolutePath}", wikiPageId = parentPage.id)
+        val image = WikiImage(name = filename, filename = "file://${file.absolutePath}", wikiPageId = parentPage.id) // TODO: Use name properly
         val id = dao.insert(image)
         image.copy(id = id)
     }
@@ -117,6 +117,10 @@ class BookRepository(private val dao: BookDao) {
 
     suspend fun getWikiImages(wikiPage: WikiPage): List<WikiImage> {
         return dao.getWikiImages(wikiPage.id)
+    }
+
+    suspend fun recordImagesAsDownloaded(wikiPage: WikiPage) {
+        dao.update(wikiPage.copy(imagesFetched = true))
     }
 
 }

@@ -27,6 +27,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
     val allImages = MutableLiveData(listOf<WikiImage>())
 
     val isLoading = MutableLiveData(false)
+    val isLoadingImages = MutableLiveData(false)
     val isSearchingPages = MutableLiveData(false)
     val isPreparingPage = MutableLiveData(false)
 
@@ -222,6 +223,47 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
     fun manuallyUpdateText(title: String) {
         pageText.value = title
         save()
+    }
+
+    fun ensureImagesDownloaded(wikiPage: WikiPage) {
+        if (wikiPage.imagesFetched) {
+            Log.d(TAG, "ensureImagesDownloaded: Images for \"${wikiPage.title}\" are downloaded, no need to download any.")
+            return
+        }
+
+        Log.d(TAG, "ensureImagesDownloaded: Fetching images for \"${wikiPage.title}\".")
+        isLoadingImages.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val dir = File(filesDir, wikiPage.title)
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+
+            // Expect the JSON blob of this to be cached, so shouldn't worry about this extra call...
+            val details = loadWikiPage(wikiPage.title, dir)
+            val imageNames = details.getImageNamesOfInterest()
+
+            Log.d(TAG, "ensureImagesDownloaded: Ensuring all ${imageNames.size} images are available.")
+            val images: List<WikiImage> = if (imageNames.isNotEmpty()) {
+                imageNames.map { filename ->
+                    async {
+                        Log.d(TAG, "ensureImagesDownloaded: Downloading $filename and saving metadata to our local DB.")
+                        val file = downloadWikiImage(filename, dir)
+                        repository.addNewWikiImage(wikiPage, filename, file)
+                    }
+                }.awaitAll()
+            } else {
+                emptyList()
+            }
+
+            repository.recordImagesAsDownloaded(wikiPage)
+
+            withContext(Dispatchers.Main) {
+                allImages.value = images
+                isLoadingImages.value = true
+            }
+        }
     }
 
 }

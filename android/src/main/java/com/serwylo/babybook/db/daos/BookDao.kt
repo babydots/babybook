@@ -8,7 +8,7 @@ import com.serwylo.babybook.db.entities.*
 interface BookDao {
 
     @Transaction
-    @Query("SELECT BookPage.*, WikiPage.id as wikiPage_id, WikiPage.text as wikiPage_text, WikiPage.title as wikiPage_title, WikiImage.id as wikiImage_id, WikiImage.filename as wikiImage_filename, WikiImage.wikiPageId as wikiImage_wikiPageId  FROM BookPage LEFT JOIN WikiPage ON (WikiPage.id = BookPage.wikiPageId) LEFT JOIN WikiImage ON (WikiImage.id = BookPage.wikiImageId) WHERE BookPage.bookId = :bookId")
+    @Query("SELECT BookPage.*, WikiPage.id as wikiPage_id, WikiPage.text as wikiPage_text, WikiPage.title as wikiPage_title, WikiPage.imagesFetched as wikiPage_imagesFetched, WikiImage.id as wikiImage_id, WikiImage.filename as wikiImage_filename, WikiImage.wikiPageId as wikiImage_wikiPageId  FROM BookPage LEFT JOIN WikiPage ON (WikiPage.id = BookPage.wikiPageId) LEFT JOIN WikiImage ON (WikiImage.id = BookPage.wikiImageId) WHERE BookPage.bookId = :bookId")
     fun getPageEditingData(bookId: Long): LiveData<List<PageEditingData>>
 
     @Query("SELECT Book.*, WikiImage.filename as coverPageImagePath FROM Book LEFT JOIN BookPage ON BookPage.id = (SELECT bp.id FROM BookPage as bp WHERE bp.wikiImageId IS NOT NULL AND bp.bookId = Book.id ORDER BY bp.pageNumber ASC LIMIT 0, 1) LEFT JOIN WikiImage ON (WikiImage.id = BookPage.wikiImageId)")
@@ -56,6 +56,9 @@ interface BookDao {
 
     @Update
     suspend fun update(bookPage: BookPage)
+
+    @Update
+    suspend fun update(wikiPage: WikiPage)
 
     @Delete(entity = Book::class)
     suspend fun delete(book: Book)
