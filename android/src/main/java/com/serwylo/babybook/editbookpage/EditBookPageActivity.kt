@@ -175,31 +175,28 @@ class EditBookPageActivity : AppCompatActivity() {
             val images = viewModel.allImages.value
             val wikiPage = viewModel.wikiPage.value
 
-            if (images != null && wikiPage != null) {
-                if (images.size <= 1) {
-                    val message = if (images.isEmpty()) {
-                        "No images found in the wiki page for \"${wikiPage.title}\""
-                    } else {
-                        "Only one image found in the wiki page for \"${wikiPage.title}\""
-                    }
-                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-                } else {
-                    val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
-                    view.images.layoutManager = GridLayoutManager(this, 3)
+            if (wikiPage != null) {
+                val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
+                view.images.layoutManager = GridLayoutManager(this, 3)
 
-                    val alert = AlertDialog.Builder(this)
-                        .setView(view.root)
-                        .setPositiveButton("Close") { _, _ -> }
-                        .show()
+                val alert = AlertDialog.Builder(this)
+                    .setView(view.root)
+                    .setPositiveButton("Close") { _, _ -> }
+                    .show()
 
-                    view.images.adapter = SelectImageAdapter(images).also { adapter ->
-                        adapter.setImageSelectedListener { wikiImage ->
-                            viewModel.mainImage.value = wikiImage
-                            alert.dismiss()
-                            viewModel.save()
-                        }
+                val adapter = SelectImageAdapter(images ?: listOf()).also { adapter ->
+                    adapter.setImageSelectedListener { wikiImage ->
+                        viewModel.mainImage.value = wikiImage
+                        alert.dismiss()
+                        viewModel.save()
                     }
                 }
+
+                view.images.adapter = adapter
+
+                viewModel.allImages.observe(this) { adapter.setImages(it) }
+
+                viewModel.ensureImagesDownloaded(wikiPage)
             }
         }
 

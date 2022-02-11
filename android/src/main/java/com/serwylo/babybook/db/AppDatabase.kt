@@ -54,7 +54,13 @@ private suspend fun createBook(dao: BookDao, book: InitBook) {
     book.pages.forEachIndexed { index, wikiPage ->
         val wikiPageId = dao.insert(WikiPage(wikiPage.title, wikiPage.description))
         val wikiImageIds = wikiPage.images.map { filename ->
-            dao.insert(WikiImage("file:///android_asset/books/$filename", wikiPageId))
+            dao.insert(
+                WikiImage(
+                    filename, // TODO: Use the proper filename from commons.
+                    "file:///android_asset/books/$filename",
+                    wikiPageId,
+                )
+            )
         }
 
         val processedTitle = processTitle(wikiPage.title)
