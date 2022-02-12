@@ -1,9 +1,9 @@
-package com.serwylo.babybook
+package com.serwylo.babybook.views
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.serwylo.babybook.R
 import kotlinx.coroutines.*
 
 /**

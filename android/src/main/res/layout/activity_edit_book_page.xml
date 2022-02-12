@@ -31,7 +31,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.serwylo.babybook.DelayAutoCompleteTextView
+                <com.serwylo.babybook.views.DelayAutoCompleteTextView
                     android:id="@+id/title_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

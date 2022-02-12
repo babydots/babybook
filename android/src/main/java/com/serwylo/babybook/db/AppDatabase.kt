@@ -13,12 +13,8 @@ import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.db.entities.WikiImage
 import com.serwylo.babybook.db.entities.WikiPage
 import com.serwylo.babybook.mediawiki.processTitle
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 
 @Database(entities = [Book::class, BookPage::class, WikiPage::class, WikiImage::class], version = 2)

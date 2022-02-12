@@ -9,13 +9,7 @@ import java.io.File
 
 class BookRepository(private val dao: BookDao) {
 
-    fun getAllBooks(): LiveData<List<Book>> = dao.findAll()
-
     fun getAllBooksWithCoverPage(): LiveData<List<BookWithCoverPage>> = dao.findAllWithCoverPage()
-
-    fun getBookWithPages(bookId: Long): LiveData<BookWithPages> = dao.getBookWithPages(bookId)
-
-    fun getBookPages(book: Book): LiveData<List<BookPage>> = dao.getBookPages(book.id)
 
     suspend fun removeBook(book: Book) = withContext(Dispatchers.IO) {
         dao.delete(book)
