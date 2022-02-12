@@ -3,24 +3,17 @@ package com.serwylo.babybook.bookviewer
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.DocumentsContract
-import android.util.Log
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.serwylo.babybook.R
-import com.serwylo.babybook.book.BookConfig
-import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
-import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.db.entities.PageEditingData
 import com.serwylo.babybook.db.repositories.BookRepository
-import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
@@ -58,14 +51,10 @@ class BookViewerActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            /*R.id.share -> {
-                share()
-                return true
-            }*/
             R.id.view_in_wikipedia -> {
-                /*viewModel.currentPage()?.wikiPageTitle?.also { title ->
+                viewModel.currentPage()?.wikiPage?.title?.also { title ->
                     viewInWikipedia(this, title)
-                }*/
+                }
                 return true
             }
             R.id.pdf -> {
@@ -74,10 +63,6 @@ class BookViewerActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun share() {
-
     }
 
     private fun startPdfExport() {

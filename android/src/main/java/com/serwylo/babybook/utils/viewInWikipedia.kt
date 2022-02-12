@@ -5,6 +5,6 @@ import android.content.Intent
 import android.net.Uri
 
 fun viewInWikipedia(context: Context, pageTitle: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://simple.wikipedia.org/wiki/$pageTitle"));
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://simple.wikipedia.org/wiki/$pageTitle"))
     context.startActivity(intent)
 }

@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.serwylo.babybook.booklist.BookListViewModel
 import com.serwylo.babybook.booklist.BookListViewModelFactory

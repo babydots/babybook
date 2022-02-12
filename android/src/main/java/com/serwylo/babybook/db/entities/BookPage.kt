@@ -40,7 +40,4 @@ data class BookPage(
 
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-) {
-
-
-}
+)
