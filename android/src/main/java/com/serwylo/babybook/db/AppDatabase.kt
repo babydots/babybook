@@ -58,7 +58,7 @@ private suspend fun createBook(dao: BookDao, book: InitBook) {
                 WikiImage(
                     filename, // TODO: Use the proper filename from commons.
                     "file:///android_asset/books/$filename",
-                    wikiPageId,
+                    null,
                 )
             )
         }

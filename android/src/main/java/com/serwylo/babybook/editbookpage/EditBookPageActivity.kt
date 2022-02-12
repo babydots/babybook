@@ -196,6 +196,18 @@ class EditBookPageActivity : AppCompatActivity() {
 
                 viewModel.allImages.observe(this) { adapter.setImages(it) }
 
+                viewModel.isLoadingImages.observe(this) { isLoading ->
+                    if (isLoading) {
+                        view.images.visibility = View.GONE
+                        view.loadingSpinner.visibility = View.VISIBLE
+                        view.loadingText.visibility = View.VISIBLE
+                    } else {
+                        view.images.visibility = View.VISIBLE
+                        view.loadingSpinner.visibility = View.GONE
+                        view.loadingText.visibility = View.GONE
+                    }
+                }
+
                 viewModel.ensureImagesDownloaded(wikiPage)
             }
         }
