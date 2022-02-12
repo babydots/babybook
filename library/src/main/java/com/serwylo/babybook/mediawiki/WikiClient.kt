@@ -9,6 +9,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.*
 import org.apache.commons.codec.digest.DigestUtils
@@ -55,6 +56,17 @@ suspend fun makeBookPageFromWikiPage(title: String, config: BookConfig, cacheDir
 
 fun processTitle(title: String): String {
     return title.replace(Regex(" \\(.*\\)"), "")
+}
+
+val nonRedirectingHttp = HttpClient(CIO) {
+    install(JsonFeature)  {
+        serializer = GsonSerializer() {
+            setLenient()
+        }
+    }
+
+    followRedirects = false
+    expectSuccess = false
 }
 
 val http = HttpClient(CIO) {
@@ -240,7 +252,7 @@ suspend fun downloadImages(imageNames: List<String>, destDir: File): List<File> 
         async(Dispatchers.IO) { downloadWikiImage(filename, destDir) }
     }
 
-    return@coroutineScope jobs.awaitAll()
+    return@coroutineScope jobs.awaitAll().filterNotNull()
 }
 
 fun commonsUrlForImage(filename: String): String {
@@ -251,7 +263,12 @@ fun commonsUrlForImage(filename: String): String {
     return "https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.substring(0, 1)}/${md5.substring(0, 2)}/$name/$suffix"
 }
 
-suspend fun downloadWikiImage(filename: String, destDir: File): File {
+/**
+ * @param lookForRenamedImageOnFailure After implementing this functionality for the "Horse" wiki
+ * page, it became clear that the renamed file was included twice and so perhaps it isn't really
+ * all that important to follow up on renamed images.
+ */
+suspend fun downloadWikiImage(filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): File? {
     val outputFile = File(destDir, filename)
 
     if (outputFile.exists()) {
@@ -263,10 +280,68 @@ suspend fun downloadWikiImage(filename: String, destDir: File): File {
 
     println("Downloading $url")
 
-    val response: HttpResponse = http.get(url)
-    response.content.copyTo(outputFile.outputStream())
+    // Some images have been renamed on wikipedia but not commons. An example is the main image
+    // from the "Horse" article, which on wikipedia refers to "Farmer_plowing.jpg". If you try
+    // to download that image from commons using
+    // https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Farmer_plowing.jpg/1024px-Farmer_plowing.jpg
+    // then it will fail.
+    //
+    // This is because the image has actually been renamed, as can be seen when you try to view the
+    // image via https://simple.wikipedia.org/wiki/Special:Redirect/file/Farmer_plowing.jpg which
+    // results in a 301 to https://upload.wikimedia.org/wikipedia/commons/a/a2/04-09-12-Schaupfl%C3%BCgen-Fahrenwalde-RalfR-IMG_1232.jpg
+    //
+    // Therefore, if we get a 404 for the first more predictable URL (which assume no redirects)
+    // then we try again by performing a HEAD request to "/wiki/Special:Redirect/file/..." and
+    // then capturing the final path segment (in the example above it would be 04-09-12-Schaupfl%C3%BCgen-Fahrenwalde-RalfR-IMG_1232.jpg)
+    // and trying once more.
+    val response: HttpResponse = try {
+        http.get(url)
+    } catch (originalException: Exception) {
+        if (!lookForRenamedImageOnFailure) {
+            println("Ignoring $filename because it wasn't found and we are not looking for renamed variants.")
+            return null
+        }
 
+        println("Noticed an error (${originalException.message}) fetching $url, so will try to see if it has been redirected to a different image.")
+        val newFilename = discoverFilenameFromRenamedImage(filename)
+        if (newFilename == null) {
+            println("Still couldn't find image $filename, so giving up.");
+            return null
+        }
+
+        val newUrl = commonsUrlForImage(newFilename)
+
+        println("Downloading from alternate URL (probably a renamed image): $newUrl")
+        try {
+            http.get(newUrl)
+        } catch (innerException: Exception) {
+            println("Error downloading from alternate URL $newUrl: ${innerException.message}")
+            return null
+        }
+    } finally {}
+
+    response.content.copyTo(outputFile.outputStream())
     return outputFile
+}
+
+private suspend fun discoverFilenameFromRenamedImage(filename: String): String? {
+    val sourceUrl = "https://simple.wikipedia.org/wiki/Special:Redirect/file/$filename"
+    println("Checking if $filename has been renamed by looking for redirects in a HEAD request to $sourceUrl")
+    try {
+        val headResponse: HttpResponse = nonRedirectingHttp.head(sourceUrl)
+        val redirectUrl = headResponse.headers["location"]
+        if (redirectUrl == null) {
+            println("No \"location\" header present, only saw: [\"${headResponse.headers.names().joinToString("\", \"")}\"]")
+            return null
+        }
+
+        val newFilename = Url(redirectUrl).encodedPath.split("/").last()
+        println("We think the new filename for $filename is $newFilename (URL Decoded value is ${URLDecoder.decode(newFilename)}).")
+        return URLDecoder.decode(newFilename)
+    } catch (innerException: Exception) {
+        println("Still got an error looking for the original image at $sourceUrl, so will return null")
+        return null
+    }
 }
 
 fun extractSentencesFromParagraphs(paragraphs: List<String>): List<String> {

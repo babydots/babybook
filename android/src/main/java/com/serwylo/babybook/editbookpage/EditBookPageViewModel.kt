@@ -134,10 +134,15 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
                             } else {
                                 Log.d(TAG, "preparePage: Downloading $filename and saving metadata to our local DB.")
                                 val file = downloadWikiImage(filename, dir)
-                                repository.addNewWikiImage(newWikiPage, filename, file)
+                                if (file == null) {
+                                    Log.w(TAG, "Couldn't find image for $filename, so ignoring.")
+                                    null
+                                } else {
+                                    repository.addNewWikiImage(newWikiPage, filename, file)
+                                }
                             }
                         }
-                    }.awaitAll()
+                    }.awaitAll().filterNotNull()
 
                     withContext(Dispatchers.Main) {
                         allImages.value = images
@@ -225,15 +230,21 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
         save()
     }
 
+    private var downloadingImagesJob: Job? = null
+
     fun ensureImagesDownloaded(wikiPage: WikiPage) {
         if (wikiPage.imagesFetched) {
             Log.d(TAG, "ensureImagesDownloaded: Images for \"${wikiPage.title}\" are downloaded, no need to download any.")
+            return
+        } else if (downloadingImagesJob != null) {
+            val message = if (downloadingImagesJob?.isCompleted == true) "Already downloaded" else "Currently downloading"
+            Log.d(TAG, "ensureImagesDownloaded: $message images for \"${wikiPage.title}\"")
             return
         }
 
         Log.d(TAG, "ensureImagesDownloaded: Fetching images for \"${wikiPage.title}\".")
         isLoadingImages.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        downloadingImagesJob = viewModelScope.launch(Dispatchers.IO) {
 
             val dir = File(filesDir, wikiPage.title)
             if (!dir.exists()) {
@@ -244,24 +255,32 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
             val details = loadWikiPage(wikiPage.title, dir)
             val imageNames = details.getImageNamesOfInterest()
 
-            Log.d(TAG, "ensureImagesDownloaded: Ensuring all ${imageNames.size} images are available.")
+            Log.d(TAG, "ensureImagesDownloaded: Ensuring all ${imageNames.size} images are available...")
             val images: List<WikiImage> = if (imageNames.isNotEmpty()) {
                 imageNames.map { filename ->
                     async {
-                        Log.d(TAG, "ensureImagesDownloaded: Downloading $filename and saving metadata to our local DB.")
+                        Log.d(TAG, "ensureImagesDownloaded: Downloading $filename...")
                         val file = downloadWikiImage(filename, dir)
-                        repository.addNewWikiImage(wikiPage, filename, file)
+
+                        if (file == null) {
+                            Log.w(TAG, "ensureImagesDownloaded: Couldn't find image for $filename, so ignoring.")
+                            null
+                        } else {
+                            Log.d(TAG, "ensureImagesDownloaded: Finished downloading $filename, will save to local DB.")
+                            repository.addNewWikiImage(wikiPage, filename, file)
+                        }
                     }
-                }.awaitAll()
+                }.awaitAll().filterNotNull()
             } else {
                 emptyList()
             }
+            Log.d(TAG, "ensureImagesDownloaded: Finished downloading and saving all ${imageNames.size} images to the local DB. Will record images as downloaded so we don't re-download again.")
 
             repository.recordImagesAsDownloaded(wikiPage)
 
             withContext(Dispatchers.Main) {
                 allImages.value = images
-                isLoadingImages.value = true
+                isLoadingImages.value = false
             }
         }
     }
