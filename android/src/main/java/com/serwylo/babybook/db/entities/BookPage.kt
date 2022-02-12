@@ -1,15 +1,8 @@
 package com.serwylo.babybook.db.entities
 
-import android.content.Context
-import android.net.Uri
-import android.util.Log
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.serwylo.babybook.mediawiki.processTitle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.File
 
 @Entity(
     foreignKeys = [
@@ -22,9 +15,15 @@ import java.io.File
         ForeignKey(
             entity = WikiPage::class,
             parentColumns = ["id"],
-            childColumns = ["bookId"],
+            childColumns = ["wikiPageId"],
             onDelete = ForeignKey.SET_NULL
-        )
+        ),
+        ForeignKey(
+            entity = WikiImage::class,
+            parentColumns = ["id"],
+            childColumns = ["wikiImageId"],
+            onDelete = ForeignKey.SET_NULL
+        ),
     ]
 )
 data class BookPage(
