@@ -1,9 +1,11 @@
 package com.serwylo.babybook.db
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.serwylo.babybook.db.daos.BookDao
 import com.serwylo.babybook.db.entities.Book
@@ -19,7 +21,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-@Database(entities = [Book::class, BookPage::class, WikiPage::class, WikiImage::class], version = 1)
+@Database(entities = [Book::class, BookPage::class, WikiPage::class, WikiImage::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
 
@@ -35,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
         private fun buildDatabase(context: Context): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "database.db")
                 .addCallback(makeSeeder(context))
+                .addMigrations(MIGRATION_1_2)
                 .build()
 
         private fun makeSeeder(context: Context) = object: RoomDatabase.Callback() {
@@ -322,3 +325,13 @@ private val initialBookData = listOf(
 
 private data class InitBook(val title: String, val pages: List<InitWikiPage>)
 private data class InitWikiPage(val title: String, val description: String, val images: List<String>)
+
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        Log.i(TAG, "migrate: Migrating DB from v1 to v2.")
+        /*database.execSQL("CREATE TABLE `Fruit` (`id` INTEGER, `name` TEXT, " +
+                "PRIMARY KEY(`id`))")*/
+    }
+}
+
+const val TAG = "Database"
