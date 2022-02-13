@@ -83,7 +83,11 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
 
     suspend fun preparePage(title: String): Boolean = withContext(Dispatchers.IO) {
         Log.d(TAG, "preparePage: Getting ready to fetch wiki data")
-        withContext(Dispatchers.Main) { isPreparingPage.value = true }
+        withContext(Dispatchers.Main) {
+            isPreparingPage.value = true
+            allImages.value = listOf()
+            mainImage.value = null
+        }
 
         try {
             val existingWikiPage = repository.findWikiPageByTitle(title)
@@ -121,37 +125,27 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
                 Log.d(TAG, "preparePage: Saving book page to DB now that we have wiki page details.")
                 val initialSaveJob = save()
 
-                val imageNames = details.getImageNamesOfInterest()
+                val imageName = details.getImageNamesOfInterest().firstOrNull()
 
-                Log.d(TAG, "preparePage: Ensuring all ${imageNames.size} images are available.")
-                if (imageNames.isNotEmpty()) {
-                    val images: List<WikiImage> = imageNames.map { filename ->
-                        async(Dispatchers.IO) {
-                            val existingWikiImage = repository.findWikiImageByName(filename)
-                            if (existingWikiImage != null) {
-                                Log.d(TAG, "preparePage: Ignoring $filename because we already have a local copy saved.")
-                                existingWikiImage
-                            } else {
-                                Log.d(TAG, "preparePage: Downloading $filename and saving metadata to our local DB.")
-                                val file = downloadWikiImage(filename, dir)
-                                if (file == null) {
-                                    Log.w(TAG, "Couldn't find image for $filename, so ignoring.")
-                                    null
-                                } else {
-                                    repository.addNewWikiImage(newWikiPage, filename, file)
-                                }
-                            }
-                        }
-                    }.awaitAll().filterNotNull()
-
-                    withContext(Dispatchers.Main) {
-                        allImages.value = images
-                        mainImage.value = images.firstOrNull()
-                    }
-                } else {
+                if (imageName == null) {
+                    Log.d(TAG, "preparePage: No images of interest in this article.")
                     withContext(Dispatchers.Main) {
                         allImages.value = listOf()
                         mainImage.value = null
+                    }
+                } else {
+                    Log.d(TAG, "preparePage: Fetching image $imageName (in total there are ${details.getImageNamesOfInterest().size} in total - they will be downloaded later when we ask to view all images)")
+                    val file = downloadWikiImage(imageName, dir)
+                    val wikiImage = if (file == null) {
+                        Log.w(TAG, "Couldn't find image for $imageName, so ignoring.")
+                        null
+                    } else {
+                        repository.addNewWikiImage(newWikiPage, imageName, file)
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        allImages.value = listOf()
+                        mainImage.value = wikiImage
                     }
                 }
 
