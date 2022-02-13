@@ -10,10 +10,14 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.serwylo.babybook.R
+import com.serwylo.babybook.book.BookConfig
+import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.entities.PageEditingData
+import com.serwylo.babybook.db.entities.imagePathToFile
 import com.serwylo.babybook.db.repositories.BookRepository
+import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
@@ -98,25 +102,25 @@ class BookViewerActivity : AppCompatActivity() {
     }
 
     private suspend fun exportPdf(outputStream: OutputStream) {
-        /*
-        viewModel.bookWithPages.value?.also { bookWithPages ->
-            val pages = bookWithPages.pages.map {
-                val file = it.imageFile(this)
+        viewModel.pages.value?.also { pages ->
+            val pdfPages = pages.map {
+                val file = imagePathToFile(this, it.image?.filename)
 
                 Page(
                     it.title(),
                     file,
-                    it.text() ?: "",
+                    it.text(),
                 )
             }
 
-            val pdfFile = File(cacheDir, "${bookWithPages.book.title}.pdf")
+            val title = viewModel.book.value?.title ?: "Book"
 
-            generatePdf(bookWithPages.book.title, pages.filterNotNull(), pdfFile, BookConfig.Default)
+            val pdfFile = File(cacheDir, "${title}.pdf")
+
+            generatePdf(title, pdfPages, pdfFile, BookConfig.Default)
 
             pdfFile.inputStream().use { it.copyTo(outputStream) }
         }
-        */
     }
 
     private fun setup(binding: ActivityBookViewerBinding) {
