@@ -11,6 +11,7 @@ import com.serwylo.babybook.db.entities.WikiPage
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.mediawiki.downloadWikiImage
 import com.serwylo.babybook.mediawiki.loadWikiPage
+import com.serwylo.babybook.mediawiki.WikiPage as FetchedWikiPage
 import kotlinx.coroutines.*
 import java.io.File
 
@@ -80,90 +81,119 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
         }
     }
 
-
-    suspend fun preparePage(title: String): Boolean = withContext(Dispatchers.IO) {
-        Log.d(TAG, "preparePage: Getting ready to fetch wiki data")
+    private suspend fun prepareExistingPage(existingWikiPage: WikiPage) = withContext(Dispatchers.IO) {
         withContext(Dispatchers.Main) {
-            isPreparingPage.value = true
-            allImages.value = listOf()
-            mainImage.value = null
+            wikiPage.value = existingWikiPage
+            pageTitle.value = null
+            pageText.value = null
         }
 
+        if (existingWikiPage.imagesFetched) {
+            Log.d(TAG, "preparePage: Existing images have already been fetched for wiki page ${existingWikiPage.id}.")
+            val images = repository.getWikiImages(existingWikiPage)
+
+            withContext(Dispatchers.Main) {
+                mainImage.value = images.firstOrNull()
+                allImages.value = images
+            }
+        } else {
+            Log.d(TAG, "preparePage: No images yet fetched for wiki page ${existingWikiPage.id}. Will go and fetch wiki details, list of images, and then download the first image of interest.")
+            val details = fetchPageDataFromWiki(existingWikiPage.title)
+            val image = fetchImageFromWiki(existingWikiPage, details)
+
+            withContext(Dispatchers.Main) {
+                mainImage.value = image
+                allImages.value = listOf()
+            }
+        }
+
+        save()
+    }
+
+    private suspend fun prepareNewPage(title: String) = withContext(Dispatchers.IO) {
+        val details = fetchPageDataFromWiki(title)
+
+        Log.d(TAG, "preparePage: Wikipedia page details loaded, will save to DB.")
+        val newWikiPage = repository.addNewWikiPage(title, details.parseParagraphs().firstOrNull() ?: "")
+
+        withContext(Dispatchers.Main) {
+            wikiPage.value = newWikiPage
+            pageTitle.value = null
+            pageText.value = null
+        }
+
+        Log.d(TAG, "preparePage: Saving book page to DB now that we have wiki page details, then we'll go fetch the image while this is happening.")
+        val initialSaveJob = save()
+
+        val image = fetchImageFromWiki(newWikiPage, details)
+
+        withContext(Dispatchers.Main) {
+            allImages.value = listOf()
+            mainImage.value = image
+        }
+
+        // If we already have cached images, then the above fetching will be faster than saving
+        // the record to the database. Hence, we wait for the save to comlete.
+        initialSaveJob.join()
+
+        Log.d(TAG, "preparePage: Saving book page again now that we know about its images.")
+        save()
+    }
+
+    suspend fun preparePage(title: String): Boolean = withContext(Dispatchers.Main) {
+        Log.d(TAG, "preparePage: Getting ready to fetch wiki data")
+        isPreparingPage.value = true
+        allImages.value = listOf()
+        mainImage.value = null
+
         try {
-            val existingWikiPage = repository.findWikiPageByTitle(title)
+            val existingWikiPage = withContext(Dispatchers.IO) { repository.findWikiPageByTitle(title) }
             if (existingWikiPage != null) {
-                withContext(Dispatchers.Main) {
-                    wikiPage.value = existingWikiPage
-                    pageTitle.value = null
-                    pageText.value = null
-                }
-
-                val images = repository.getWikiImages(existingWikiPage)
-
-                withContext(Dispatchers.Main) {
-                    mainImage.value = images.firstOrNull()
-                    allImages.value = images
-                }
+                Log.d(TAG, "preparePage: Using existing wiki page (id: ${existingWikiPage.id})")
+                prepareExistingPage(existingWikiPage)
             } else {
                 Log.d(TAG, "preparePage: Page does not yet exist in our local DB, will fetch it.")
-                val dir = File(filesDir, title)
-                if (!dir.exists()) {
-                    dir.mkdirs()
-                }
-
-                val details = loadWikiPage(title, dir)
-
-                Log.d(TAG, "preparePage: Wikipedia page details loaded, will save to DB.")
-                val newWikiPage = repository.addNewWikiPage(title, details.parseParagraphs().firstOrNull() ?: "")
-
-                withContext(Dispatchers.Main) {
-                    wikiPage.value = newWikiPage
-                    pageTitle.value = null
-                    pageText.value = null
-                }
-
-                Log.d(TAG, "preparePage: Saving book page to DB now that we have wiki page details.")
-                val initialSaveJob = save()
-
-                val imageName = details.getImageNamesOfInterest().firstOrNull()
-
-                if (imageName == null) {
-                    Log.d(TAG, "preparePage: No images of interest in this article.")
-                    withContext(Dispatchers.Main) {
-                        allImages.value = listOf()
-                        mainImage.value = null
-                    }
-                } else {
-                    Log.d(TAG, "preparePage: Fetching image $imageName (in total there are ${details.getImageNamesOfInterest().size} in total - they will be downloaded later when we ask to view all images)")
-                    val file = downloadWikiImage(imageName, dir)
-                    val wikiImage = if (file == null) {
-                        Log.w(TAG, "Couldn't find image for $imageName, so ignoring.")
-                        null
-                    } else {
-                        repository.addNewWikiImage(newWikiPage, imageName, file)
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        allImages.value = listOf()
-                        mainImage.value = wikiImage
-                    }
-                }
-
-                // If we already have cached images, then the above fetching will be faster than saving
-                // the record to the database. Hence, we wait for the save to comlete.
-                initialSaveJob.join()
-
-                Log.d(TAG, "preparePage: Saving book page again now that we know about its images.")
-                save()
+                prepareNewPage(title)
             }
 
-            return@withContext true
+            true
         } catch (e: Throwable) {
             Log.e(TAG, "preparePage: Error fetching wiki data: $e", e)
-            return@withContext false
+            false
         } finally {
-            withContext(Dispatchers.Main) {
-                isPreparingPage.value = false
+            isPreparingPage.value = false
+        }
+    }
+
+    private suspend fun ensureDataDir(title: String) = withContext(Dispatchers.IO) {
+        val dir = File(filesDir, title)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+
+        dir
+    }
+
+    private suspend fun fetchPageDataFromWiki(title: String) = withContext(Dispatchers.IO) {
+        val dir = ensureDataDir(title)
+        loadWikiPage(title, dir)
+    }
+
+    private suspend fun fetchImageFromWiki(wikiPage: WikiPage, details: FetchedWikiPage): WikiImage? = withContext(Dispatchers.IO) {
+        val imageName = details.getImageNamesOfInterest().firstOrNull()
+
+        if (imageName == null) {
+            Log.d(TAG, "preparePage: No images of interest in this article.")
+            null
+        } else {
+            Log.d(TAG, "preparePage: Fetching image $imageName (in total there are ${details.getImageNamesOfInterest().size} in total - they will be downloaded later when we ask to view all images)")
+            val dir = ensureDataDir(wikiPage.title)
+            val file = downloadWikiImage(imageName, dir)
+            if (file == null) {
+                Log.w(TAG, "Couldn't find image for $imageName, so ignoring.")
+                null
+            } else {
+                repository.addNewWikiImage(wikiPage, imageName, file)
             }
         }
     }
