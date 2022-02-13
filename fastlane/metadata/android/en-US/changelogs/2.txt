@@ -1,0 +1,5 @@
+Improvements:
+* Allow choosing from any of the images on the wiki page.
+* Improved UI when editing books.
+
+Please provide any feedback or report any issues on the issue tracker at https://github.com/babydots/babybook/issues. Donate to support further development.
