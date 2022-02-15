@@ -33,6 +33,15 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
+            android:name=".attribution.AttributionActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:parentActivityName=".bookviewer.BookViewerActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".bookviewer.BookViewerActivity" />
+        </activity>
+        <activity
             android:name=".editbookpage.EditBookPageActivity"
             android:exported="false"
             android:launchMode="singleTop"

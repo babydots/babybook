@@ -26,6 +26,6 @@ dependencies {
 	implementation "com.sksamuel.scrimage:scrimage-core:4.0.22"
 
 	implementation 'commons-codec:commons-codec:1.15'
-	
+
 }
 

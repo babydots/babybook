@@ -3,9 +3,9 @@ package com.serwylo.babybook.db.repositories
 import androidx.lifecycle.LiveData
 import com.serwylo.babybook.db.daos.BookDao
 import com.serwylo.babybook.db.entities.*
+import com.serwylo.babybook.mediawiki.WikipediaCommonsFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class BookRepository(private val dao: BookDao) {
 
@@ -95,8 +95,15 @@ class BookRepository(private val dao: BookDao) {
         page.copy(id = id)
     }
 
-    suspend fun addNewWikiImage(parentPage: WikiPage, filename: String, file: File): WikiImage = withContext(Dispatchers.IO) {
-        val image = WikiImage(name = filename, filename = "file://${file.absolutePath}", wikiPageId = parentPage.id) // TODO: Use name properly
+    suspend fun addNewWikiImage(parentPage: WikiPage, file: WikipediaCommonsFile): WikiImage = withContext(Dispatchers.IO) {
+        val image = WikiImage(
+            title = file.title,
+            name = file.file.name,
+            filename = "file://${file.file.absolutePath}",
+            author = file.author,
+            license = file.license,
+            wikiPageId = parentPage.id
+        )
         val id = dao.insert(image)
         image.copy(id = id)
     }

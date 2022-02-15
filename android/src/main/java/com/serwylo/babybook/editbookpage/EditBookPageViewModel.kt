@@ -193,7 +193,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
                 Log.w(TAG, "Couldn't find image for $imageName, so ignoring.")
                 null
             } else {
-                repository.addNewWikiImage(wikiPage, imageName, file)
+                repository.addNewWikiImage(wikiPage, file)
             }
         }
     }
@@ -280,8 +280,8 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
             val imageNames = details.getImageNamesOfInterest()
 
             Log.d(TAG, "ensureImagesDownloaded: Ensuring all ${imageNames.size} images are available...")
-            val images: List<WikiImage> = if (imageNames.isNotEmpty()) {
-                imageNames.map { filename ->
+            val images: List<WikiImage> = if (imageNames.size > 1) { // We already downloaded the first image when showing the article to the user.
+                imageNames.subList(1, imageNames.size).map { filename ->
                     async {
                         Log.d(TAG, "ensureImagesDownloaded: Downloading $filename...")
                         val file = downloadWikiImage(filename, dir)
@@ -291,7 +291,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
                             null
                         } else {
                             Log.d(TAG, "ensureImagesDownloaded: Finished downloading $filename, will save to local DB.")
-                            repository.addNewWikiImage(wikiPage, filename, file)
+                            repository.addNewWikiImage(wikiPage, file)
                         }
                     }
                 }.awaitAll().filterNotNull()
