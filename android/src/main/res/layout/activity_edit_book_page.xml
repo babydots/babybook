@@ -172,10 +172,8 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingEnd="50dp"
-        app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/main_image"
+        app:layout_constraintBottom_toTopOf="@id/body_text"
         app:layout_constraintWidth_max="wrap"
         />
 
@@ -199,8 +197,10 @@
         android:background="#88ffffff"
         android:layout_margin="16dp"
         tools:text="Bug"
-        android:textSize="32sp"
+        android:textAppearance="?attr/textAppearanceHeadline1"
         android:textColor="@color/black"
+        android:textSize="42sp"
+        android:padding="12dp"
         android:paddingStart="8dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"

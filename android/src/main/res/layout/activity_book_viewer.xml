@@ -29,8 +29,9 @@
         app:layout_constraintHorizontal_bias="0"
         app:layout_constrainedWidth="true"
         tools:text="Hubble Space Telescope"
+        android:textAppearance="?attr/textAppearanceHeadline1"
         android:textColor="@color/black"
-        android:textSize="32sp"
+        android:textSize="42sp"
         android:background="#88ffffff"
         android:padding="12dp"
         android:layout_margin="32dp" />
@@ -43,6 +44,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="A bug is a thing which is nice to look at but we don't touch them."
+        android:textAppearance="?attr/textAppearanceBody1"
         android:textColor="@color/black"
         android:background="#88ffffff"
         android:padding="12dp"
