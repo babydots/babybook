@@ -1,0 +1,8 @@
+Improvements:
+* Better fonts.
+* More sensible icons for changing pages.
+
+Bugfix:
+* When editing a page with no image, show text in correct position.
+
+Please provide any feedback or report any issues on the issue tracker at https://github.com/babydots/babybook/issues. Donate to support further development.
