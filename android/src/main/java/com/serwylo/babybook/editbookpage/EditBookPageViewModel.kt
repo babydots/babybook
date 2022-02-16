@@ -281,7 +281,8 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
 
             Log.d(TAG, "ensureImagesDownloaded: Ensuring all ${imageNames.size} images are available...")
             val images: List<WikiImage> = if (imageNames.size > 1) { // We already downloaded the first image when showing the article to the user.
-                imageNames.subList(1, imageNames.size).map { filename ->
+
+                val outstandingImages = imageNames.subList(1, imageNames.size).map { filename ->
                     async {
                         Log.d(TAG, "ensureImagesDownloaded: Downloading $filename...")
                         val file = downloadWikiImage(filename, dir)
@@ -295,6 +296,17 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
                         }
                     }
                 }.awaitAll().filterNotNull()
+
+                // Once we finish downloading all-but-the-first image, we need to add back the first
+                // image to the list of "allImages" to display to the user, otherwise it will be
+                // missing until they properly reload the activity.
+                val main = mainImage.value
+                if (main != null) {
+                    listOf(main) + outstandingImages
+                } else {
+                    outstandingImages
+                }
+
             } else {
                 emptyList()
             }
