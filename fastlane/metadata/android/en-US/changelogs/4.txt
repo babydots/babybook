@@ -1,0 +1,7 @@
+Attribution:
+* View the Wikipedia (text) and Commons (images) licenses from the book menu.
+* License info is fetched automatically when producing a book.
+* Limitation: Doesn't apply to existing books. Future work will attribute built in books.
+
+Bugfix:
+* Don't show images twice when selecting new images.
