@@ -3,6 +3,7 @@ package com.serwylo.babybook.bookviewer
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.serwylo.babybook.R
+import com.serwylo.babybook.attribution.AttributionActivity
 import com.serwylo.babybook.book.BookConfig
 import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
@@ -63,6 +65,14 @@ class BookViewerActivity : AppCompatActivity() {
             }
             R.id.pdf -> {
                 startPdfExport()
+                return true
+            }
+            R.id.attribution -> {
+                viewModel.book.value?.id?.also { bookId ->
+                    startActivity(Intent(this, AttributionActivity::class.java).apply {
+                        putExtra(AttributionActivity.EXTRA_BOOK_ID, bookId)
+                    })
+                }
                 return true
             }
         }

@@ -55,7 +55,13 @@ class Wiki: Subcommand("wiki", "Fetch data from wikipedia") {
                     downloadWikiImage(imageName, pageCacheDir)
                 }
             } else {
-                downloadImages(wikiPage.getImageNamesOfInterest(), pageCacheDir)
+                downloadImages(wikiPage.getImageNamesOfInterest(), pageCacheDir).forEach { file ->
+                    println("Image: ${file.file.name}")
+                    println("  ${file.title}")
+                    println("  ${file.description}")
+                    println("  by ${file.author}")
+                    println("  ${file.license}")
+                }
             }
         }
     }

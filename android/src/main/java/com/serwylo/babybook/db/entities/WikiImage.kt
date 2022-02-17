@@ -1,5 +1,6 @@
 package com.serwylo.babybook.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -14,6 +15,11 @@ import androidx.room.PrimaryKey
 )
 data class WikiImage(
     /**
+     * A human readable name provided by the uploader.
+     */
+    val title: String?,
+
+    /**
      * The name used by Wikimedia Commons to refer to this image.
      */
     val name: String?,
@@ -27,6 +33,10 @@ data class WikiImage(
      * If null, then we will need to download this image in the future.
      */
     val filename: String?,
+
+    val author: String?,
+
+    val license: String?,
 
     /**
      * Most images will have a wiki page, except for those which are pre-packaged with the app.

@@ -1,6 +1,7 @@
 package com.serwylo.babybook.db
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -13,7 +14,18 @@ import com.serwylo.babybook.db.migrations.Migrate1To2
 import com.serwylo.babybook.db.migrations.makeDatabaseSeeder
 
 
-@Database(entities = [Book::class, BookPage::class, WikiPage::class, WikiImage::class], version = 2)
+@Database(
+    entities = [
+        Book::class,
+        BookPage::class,
+        WikiPage::class,
+        WikiImage::class
+    ],
+    version = 3,
+    autoMigrations = [
+        AutoMigration(from = 2, to = 3),
+    ]
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
 

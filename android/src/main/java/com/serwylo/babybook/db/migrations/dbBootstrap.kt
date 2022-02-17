@@ -33,9 +33,12 @@ private suspend fun createBook(dao: BookDao, book: InitBook) {
         val wikiImageIds = wikiPage.images.map { filename ->
             dao.insert(
                 WikiImage(
-                    filename, // TODO: Use the proper filename from commons.
+                    title = filename,
+                    name = filename,
                     "file:///android_asset/books/$filename",
-                    null,
+                    author = "",
+                    license = "",
+                    wikiPageId = null,
                 )
             )
         }

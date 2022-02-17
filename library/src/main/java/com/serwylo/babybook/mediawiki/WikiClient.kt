@@ -1,7 +1,9 @@
 package com.serwylo.babybook.mediawiki
 
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
+import com.google.gson.stream.JsonReader
 import com.serwylo.babybook.book.BookConfig
 import com.serwylo.babybook.book.Page
 import io.ktor.client.*
@@ -16,6 +18,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
+import java.io.StringReader
 import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.security.MessageDigest
@@ -49,7 +52,7 @@ suspend fun makeBookPageFromWikiPage(title: String, config: BookConfig, cacheDir
 
     return Page(
         title = processTitle(title),
-        image = images[0],
+        image = images[0].file,
         text,
     )
 }
@@ -245,7 +248,7 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(
     return@withContext responseWikiPage
 }
 
-suspend fun downloadImages(imageNames: List<String>, destDir: File): List<File> = coroutineScope {
+suspend fun downloadImages(imageNames: List<String>, destDir: File): List<WikipediaCommonsFile> = coroutineScope {
     println("Downloading ${imageNames.size} images (but really just downloading the first for now).")
 
     val jobs = imageNames.map { filename ->
@@ -263,14 +266,55 @@ fun commonsUrlForImage(filename: String): String {
     return "https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.substring(0, 1)}/${md5.substring(0, 2)}/$name/$suffix"
 }
 
-/**
- * @param lookForRenamedImageOnFailure After implementing this functionality for the "Horse" wiki
- * page, it became clear that the renamed file was included twice and so perhaps it isn't really
- * all that important to follow up on renamed images.
- */
-suspend fun downloadWikiImage(filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): File? {
-    val outputFile = File(destDir, filename)
+private suspend fun downloadWikiImageMetadata(filename: String): WikipediaCommonsMetadata? {
 
+    // e.g. https://commons.wikimedia.org/w/api.php?action=query&titles=Image:Gallina_de_Guinea_(Numida_meleagris),_parque_nacional_Kruger,_Sud%C3%A1frica,_2018-07-25,_DD_48.jpg&prop=imageinfo&iiprop=extmetadata
+    val metadataUrl = "https://commons.wikimedia.org/w/api.php?action=query&titles=Image:${filename.replace(' ', '_')}&prop=imageinfo&iiprop=extmetadata&format=json"
+    val metadataResponse: String = try {
+        withContext(Dispatchers.IO) { http.get(metadataUrl) }
+    } catch (e: Exception) {
+        println("Couldn't fetch metadata for $filename from $metadataUrl")
+        return null
+    }
+
+    val metadataJson = JsonParser.parseReader(
+        JsonReader(StringReader(metadataResponse)).also { reader ->
+            reader.isLenient = true
+        }
+    )
+
+    val metadataJsonPages = metadataJson.asJsonObject.get("query")?.asJsonObject?.get("pages")?.asJsonObject ?: return null
+    val pageId = metadataJsonPages.keySet().firstOrNull() ?: return null
+    val metadata = metadataJsonPages[pageId]?.asJsonObject?.get("imageinfo")?.asJsonArray?.firstOrNull()?.asJsonObject?.get("extmetadata")?.asJsonObject ?: return null
+
+    val getVal = { key: String ->
+        metadata[key]?.asJsonObject?.get("value")?.asString
+    }
+
+    val clean = { value: String -> Jsoup.parse(value).text() }
+
+    val extractAuthor = { value: String ->
+        val html = Jsoup.parse(value)
+
+        val userLink = html.selectFirst("a[href~=/wiki/User:]")
+        if (userLink != null) {
+            userLink.text()
+        } else {
+            html.text()
+        }
+    }
+
+    return WikipediaCommonsMetadata(
+        title = clean(getVal("ObjectName") ?: ""),
+        description = clean(getVal("ImageDescription") ?: ""),
+        license = clean(getVal("LicenseShortName") ?: ""),
+        author = extractAuthor(getVal("Attribution") ?: getVal("Artist") ?: ""),
+    )
+
+}
+
+private suspend fun downloadWikiImageContents(filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): File? {
+    val outputFile = File(destDir, filename)
     if (outputFile.exists()) {
         println("No need to download $filename, already downloaded.")
         return outputFile
@@ -322,6 +366,26 @@ suspend fun downloadWikiImage(filename: String, destDir: File, lookForRenamedIma
 
     response.content.copyTo(outputFile.outputStream())
     return outputFile
+}
+
+/**
+ * @param lookForRenamedImageOnFailure After implementing this functionality for the "Horse" wiki
+ * page, it became clear that the renamed file was included twice and so perhaps it isn't really
+ * all that important to follow up on renamed images.
+ */
+suspend fun downloadWikiImage(filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): WikipediaCommonsFile? {
+
+    val metadata = downloadWikiImageMetadata(filename) ?: return null
+    val file = downloadWikiImageContents(filename, destDir, lookForRenamedImageOnFailure) ?: return null
+
+    return WikipediaCommonsFile(
+        file = file,
+        title = metadata.title,
+        description = metadata.description,
+        license = metadata.license,
+        author = metadata.author,
+    )
+
 }
 
 private suspend fun discoverFilenameFromRenamedImage(filename: String): String? {
@@ -422,6 +486,29 @@ class WikiPage(
     }
 
 }
+
+// e.g. https://commons.wikimedia.org/w/api.php?action=query&titles=Image:Gallina_de_Guinea_(Numida_meleagris),_parque_nacional_Kruger,_Sud%C3%A1frica,_2018-07-25,_DD_48.jpg&prop=imageinfo&iiprop=extmetadata
+data class WikipediaCommonsFileData(
+    val file: File,
+    val title: String,
+    val description: String,
+    val license: String,
+)
+
+data class WikipediaCommonsMetadata(
+    val title: String,
+    val description: String,
+    val license: String,
+    val author: String,
+)
+
+data class WikipediaCommonsFile(
+    val file: File,
+    val title: String,
+    val description: String,
+    val license: String,
+    val author: String,
+)
 
 data class ParsedWikiPage(
     val parse: Parse,

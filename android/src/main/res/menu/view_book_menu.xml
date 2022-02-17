@@ -20,4 +20,9 @@
         android:icon="@drawable/ic_pdf"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/attribution"
+        android:title="Credits"
+        app:showAsAction="never" />
+
 </menu>
