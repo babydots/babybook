@@ -1,0 +1,5 @@
+Add warning regarding Wikipedia content:
+
+This app is intended for adults to produce books for kids, or kids to make books under the supervision of adults.
+
+Making books means searching Wikipedia. If you don't let your child search Wikipedia, you shouldn't let them make books unsupervised (but they can READ books :)

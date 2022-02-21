@@ -11,8 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.serwylo.babybook.Preferences
 import com.serwylo.babybook.R
 import com.serwylo.babybook.bookviewer.BookViewerActivity
+import com.serwylo.babybook.contentwarning.ContentWarningActivity
 import com.serwylo.babybook.databinding.ActivityEditBookBinding
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.repositories.BookRepository
@@ -31,6 +33,10 @@ class EditBookActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (!Preferences.hasShownContentWarning(this)) {
+            Preferences.setHasShownContentWarning(this)
+            startActivity(Intent(this, ContentWarningActivity::class.java))
+        }
 
         binding = ActivityEditBookBinding.inflate(layoutInflater)
         setContentView(binding.root)

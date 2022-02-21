@@ -4,4 +4,8 @@
         android:key="show_onboarding"
         android:title="Show start screen"
         android:summary="If you missed start screen the first time" />
+    <Preference
+        android:key="show_content_warning"
+        android:title="Show content warning"
+        android:summary="Warning about searching Wikipedia" />
 </PreferenceScreen>
