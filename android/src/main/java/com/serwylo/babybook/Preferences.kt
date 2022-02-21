@@ -7,6 +7,7 @@ import androidx.preference.PreferenceManager
 object Preferences {
 
     private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
+    private const val KEY_HAS_SHOWN_CONTENT_WARNING_COMPLETE = "has_shown_content_warning"
 
     private fun prefs(context: Context) = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -14,6 +15,12 @@ object Preferences {
 
     fun setOnboardingComplete(context: Context) = prefs(context).edit {
         putBoolean(KEY_ONBOARDING_COMPLETE, true)
+    }
+
+    fun hasShownContentWarning(context: Context) = prefs(context).getBoolean(KEY_HAS_SHOWN_CONTENT_WARNING_COMPLETE, false)
+
+    fun setHasShownContentWarning(context: Context) = prefs(context).edit {
+        putBoolean(KEY_HAS_SHOWN_CONTENT_WARNING_COMPLETE, true)
     }
 
 }

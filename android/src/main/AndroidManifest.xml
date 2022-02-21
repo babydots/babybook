@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BabyBook">
         <activity
+            android:name=".contentwarning.ContentWarningActivity"
+            android:exported="false" />
+        <activity
             android:name=".onboarding.OnboardingActivity"
             android:exported="false" />
         <activity

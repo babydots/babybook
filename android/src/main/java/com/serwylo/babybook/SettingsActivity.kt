@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
+import com.serwylo.babybook.contentwarning.ContentWarningActivity
 import com.serwylo.babybook.onboarding.OnboardingActivity
 
 class SettingsActivity : AppCompatActivity() {
@@ -26,6 +27,12 @@ class SettingsActivity : AppCompatActivity() {
             val showOnboarding = findPreference<Preference>("show_onboarding")
             showOnboarding?.setOnPreferenceClickListener {
                 startActivity(Intent(context, OnboardingActivity::class.java))
+                true
+            }
+
+            val showContentWarning = findPreference<Preference>("show_content_warning")
+            showContentWarning?.setOnPreferenceClickListener {
+                startActivity(Intent(context, ContentWarningActivity::class.java))
                 true
             }
         }
