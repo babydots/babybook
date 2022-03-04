@@ -11,6 +11,7 @@ import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.db.entities.WikiImage
 import com.serwylo.babybook.db.entities.WikiPage
 import com.serwylo.babybook.db.migrations.Migrate1To2
+import com.serwylo.babybook.db.migrations.Migrate3To4
 import com.serwylo.babybook.db.migrations.makeDatabaseSeeder
 
 
@@ -21,7 +22,7 @@ import com.serwylo.babybook.db.migrations.makeDatabaseSeeder
         WikiPage::class,
         WikiImage::class
     ],
-    version = 3,
+    version = 4,
     autoMigrations = [
         AutoMigration(from = 2, to = 3),
     ]
@@ -42,6 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "database.db")
                 .addCallback(makeDatabaseSeeder(context))
                 .addMigrations(Migrate1To2)
+                .addMigrations(Migrate3To4)
                 .build()
     }
 }

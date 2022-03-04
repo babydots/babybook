@@ -1,0 +1,2 @@
+Improved Attribution:
+* Ensure all default images bundled with the app have appropriate attribution.
