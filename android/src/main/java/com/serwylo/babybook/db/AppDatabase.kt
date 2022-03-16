@@ -9,6 +9,7 @@ import com.serwylo.babybook.db.daos.BookDao
 import com.serwylo.babybook.db.entities.*
 import com.serwylo.babybook.db.migrations.Migrate1To2
 import com.serwylo.babybook.db.migrations.Migrate3To4
+import com.serwylo.babybook.db.migrations.Migrate4To5
 import com.serwylo.babybook.db.migrations.makeDatabaseSeeder
 
 
@@ -21,7 +22,7 @@ import com.serwylo.babybook.db.migrations.makeDatabaseSeeder
         WikiSite::class,
         Settings::class,
     ],
-    version = 4,
+    version = 5,
     autoMigrations = [
         AutoMigration(from = 2, to = 3),
     ]
@@ -43,6 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                 .addCallback(makeDatabaseSeeder(context))
                 .addMigrations(Migrate1To2)
                 .addMigrations(Migrate3To4)
+                .addMigrations(Migrate4To5)
                 .build()
     }
 }
