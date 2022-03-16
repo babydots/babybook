@@ -3,11 +3,14 @@ package com.serwylo.babybook.bookviewer
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.serwylo.babybook.db.entities.WikiSite
 import com.serwylo.babybook.db.repositories.BookRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class BookViewerViewModel(
-    repository: BookRepository,
-    bookId: Long
+    private val repository: BookRepository,
+    private val bookId: Long
 ) : ViewModel() {
 
     val book = repository.getBookLive(bookId)
@@ -40,6 +43,10 @@ class BookViewerViewModel(
 
     fun pageCount(): Int {
         return pages.value?.size ?: 0
+    }
+
+    suspend fun getWikiSite(): WikiSite = withContext(Dispatchers.IO) {
+        repository.getWikiSite(bookId)
     }
 
 }

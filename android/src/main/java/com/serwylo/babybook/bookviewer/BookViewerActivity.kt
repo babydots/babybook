@@ -59,7 +59,10 @@ class BookViewerActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.view_in_wikipedia -> {
                 viewModel.currentPage()?.wikiPage?.title?.also { title ->
-                    viewInWikipedia(this, title)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val wikiSite = viewModel.getWikiSite()
+                        viewInWikipedia(this@BookViewerActivity, wikiSite, title)
+                    }
                 }
                 return true
             }

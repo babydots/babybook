@@ -1,14 +1,13 @@
 package com.serwylo.babybook.db.migrations
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.daos.BookDao
-import com.serwylo.babybook.db.entities.Book
-import com.serwylo.babybook.db.entities.BookPage
-import com.serwylo.babybook.db.entities.WikiImage
-import com.serwylo.babybook.db.entities.WikiPage
+import com.serwylo.babybook.db.entities.*
 import com.serwylo.babybook.mediawiki.processTitle
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,20 +16,45 @@ fun makeDatabaseSeeder(context: Context) = object: RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
         val dao = AppDatabase.getInstance(context).bookDao()
         GlobalScope.launch {
-            initialBookData.forEach { createBook(dao, it) }
+
+            val simpleEnglish = initWikiSites.map {
+                val site = WikiSite(
+                    code = it.code,
+                    title = it.title,
+                    localisedTitle = it.localisedTitle,
+                )
+
+                val id = dao.insert(site)
+
+                site.copy(id = id)
+            }.first { it.code == "simple" }
+
+            val settings = ContentValues()
+            settings.put("wikiSiteId", simpleEnglish.id)
+            db.insert("Settings", SQLiteDatabase.CONFLICT_FAIL, settings)
+
+            initialBookData.forEach { createBook(dao, simpleEnglish, it) }
         }
     }
 }
 
+data class InitWikiSite(val code: String, val title: String, val localisedTitle: String)
 data class InitBook(val title: String, val pages: List<InitWikiPage>)
 data class InitWikiPage(val title: String, val description: String, val image: InitWikiImage)
 data class InitWikiImage(val title: String, val name: String, val filename: String, val author: String, val license: String)
 
-private suspend fun createBook(dao: BookDao, book: InitBook) {
-    val bookId = dao.insert(Book(book.title))
+private suspend fun createBook(dao: BookDao, site: WikiSite, book: InitBook) {
+    val bookId = dao.insert(Book(book.title, wikiSiteId = site.id))
 
     book.pages.forEachIndexed { index, wikiPage ->
-        val wikiPageId = dao.insert(WikiPage(wikiPage.title, wikiPage.description))
+        val wikiPageId = dao.insert(
+            WikiPage(
+                wikiPage.title,
+                wikiPage.description,
+                wikiSiteId = site.id,
+            )
+        )
+
         val wikiImageId = with(wikiPage.image) {
             dao.insert(
                 WikiImage(
@@ -57,6 +81,87 @@ private suspend fun createBook(dao: BookDao, book: InitBook) {
         )
     }
 }
+
+/**
+ * Copied from https://meta.wikimedia.org/wiki/List_of_Wikipedias.
+ * This represents all languages from the 100,000+ and 1,000,000 articles table.
+ * To regenerate semi-manually, copy those tables into a .tsv file, then run this over it:
+ * cat index.tsv | awk -F '\t' -v OFS='\t' '{ print $3, $4, $2 }' | sort | awk -F '\t' '{ print "InitWikiSite(code=\"" $2 "\", title=\"" $3 "\", localisedTitle=\"" $1 "\")," }'
+ */
+val initWikiSites = listOf(
+    InitWikiSite(code="af", title="Afrikaans", localisedTitle="Afrikaans"),
+    InitWikiSite(code="ast", title="Asturian", localisedTitle="Asturianu"),
+    InitWikiSite(code="az", title="Azerbaijani", localisedTitle="Azərbaycanca"),
+    InitWikiSite(code="id", title="Indonesian", localisedTitle="Bahasa Indonesia"),
+    InitWikiSite(code="ms", title="Malay", localisedTitle="Bahasa Melayu"),
+    InitWikiSite(code="zh-min-nan", title="Min Nan", localisedTitle="Bân-lâm-gú"),
+    InitWikiSite(code="ca", title="Catalan", localisedTitle="Català"),
+    InitWikiSite(code="cy", title="Welsh", localisedTitle="Cymraeg"),
+    InitWikiSite(code="da", title="Danish", localisedTitle="Dansk"),
+    InitWikiSite(code="de", title="German", localisedTitle="Deutsch"),
+    InitWikiSite(code="et", title="Estonian", localisedTitle="Eesti"),
+    InitWikiSite(code="en", title="English", localisedTitle="English"),
+    InitWikiSite(code="es", title="Spanish", localisedTitle="Español"),
+    InitWikiSite(code="eo", title="Esperanto", localisedTitle="Esperanto"),
+    InitWikiSite(code="eu", title="Basque", localisedTitle="Euskara"),
+    InitWikiSite(code="fr", title="French", localisedTitle="Français"),
+    InitWikiSite(code="gl", title="Galician", localisedTitle="Galego"),
+    InitWikiSite(code="hr", title="Croatian", localisedTitle="Hrvatski"),
+    InitWikiSite(code="it", title="Italian", localisedTitle="Italiano"),
+    InitWikiSite(code="Wiki", title="Language", localisedTitle="Language (local)"),
+    InitWikiSite(code="la", title="Latin", localisedTitle="Latina"),
+    InitWikiSite(code="lv", title="Latvian", localisedTitle="Latviešu"),
+    InitWikiSite(code="lt", title="Lithuanian", localisedTitle="Lietuvių"),
+    InitWikiSite(code="hu", title="Hungarian", localisedTitle="Magyar"),
+    InitWikiSite(code="min", title="Minangkabau", localisedTitle="Minangkabau"),
+    InitWikiSite(code="nl", title="Dutch", localisedTitle="Nederlands"),
+    InitWikiSite(code="no", title="Norwegian (Bokmål)", localisedTitle="Norsk (Bokmål)"),
+    InitWikiSite(code="nn", title="Norwegian (Nynorsk)", localisedTitle="Nynorsk"),
+    InitWikiSite(code="uz", title="Uzbek", localisedTitle="O‘zbek"),
+    InitWikiSite(code="pl", title="Polish", localisedTitle="Polski"),
+    InitWikiSite(code="pt", title="Portuguese", localisedTitle="Português"),
+    InitWikiSite(code="ro", title="Romanian", localisedTitle="Română"),
+    InitWikiSite(code="simple", title="Simple English", localisedTitle="Simple English"),
+    InitWikiSite(code="ceb", title="Cebuano", localisedTitle="Sinugboanong Binisaya"),
+    InitWikiSite(code="sk", title="Slovak", localisedTitle="Slovenčina"),
+    InitWikiSite(code="sl", title="Slovenian", localisedTitle="Slovenščina"),
+    InitWikiSite(code="sh", title="Serbo-Croatian", localisedTitle="Srpskohrvatski / Српскохрватски"),
+    InitWikiSite(code="fi", title="Finnish", localisedTitle="Suomi"),
+    InitWikiSite(code="sv", title="Swedish", localisedTitle="Svenska"),
+    InitWikiSite(code="tt", title="Tatar", localisedTitle="Tatarça / Татарча"),
+    InitWikiSite(code="vi", title="Vietnamese", localisedTitle="Tiếng Việt"),
+    InitWikiSite(code="tr", title="Turkish", localisedTitle="Türkçe"),
+    InitWikiSite(code="vo", title="Volapük", localisedTitle="Volapük"),
+    InitWikiSite(code="war", title="Waray-Waray", localisedTitle="Winaray"),
+    InitWikiSite(code="cs", title="Czech", localisedTitle="Čeština"),
+    InitWikiSite(code="zh", title="Chinese", localisedTitle="中文"),
+    InitWikiSite(code="zh-yue", title="Cantonese", localisedTitle="粵語"),
+    InitWikiSite(code="ja", title="Japanese", localisedTitle="日本語"),
+    InitWikiSite(code="ko", title="Korean", localisedTitle="한국어"),
+    InitWikiSite(code="th", title="Thai", localisedTitle="ไทย"),
+    InitWikiSite(code="ur", title="Urdu", localisedTitle="اردو"),
+    InitWikiSite(code="arz", title="Egyptian Arabic", localisedTitle="مصرى (Maṣri)"),
+    InitWikiSite(code="bn", title="Bengali", localisedTitle="বাংলা"),
+    InitWikiSite(code="fa", title="Persian", localisedTitle="فارسی"),
+    InitWikiSite(code="he", title="Hebrew", localisedTitle="עברית"),
+    InitWikiSite(code="ta", title="Tamil", localisedTitle="தமிழ்"),
+    InitWikiSite(code="azb", title="South Azerbaijani", localisedTitle="تۆرکجه"),
+    InitWikiSite(code="hi", title="Hindi", localisedTitle="हिन्दी"),
+    InitWikiSite(code="tg", title="Tajik", localisedTitle="Тоҷикӣ"),
+    InitWikiSite(code="sr", title="Serbian", localisedTitle="Српски / Srpski"),
+    InitWikiSite(code="ar", title="Arabic", localisedTitle="العربية"),
+    InitWikiSite(code="ce", title="Chechen", localisedTitle="Нохчийн"),
+    InitWikiSite(code="hy", title="Armenian", localisedTitle="Հայերեն"),
+    InitWikiSite(code="ka", title="Georgian", localisedTitle="ქართული"),
+    InitWikiSite(code="kk", title="Kazakh", localisedTitle="Қазақша"),
+    InitWikiSite(code="ru", title="Russian", localisedTitle="Русский"),
+    InitWikiSite(code="el", title="Greek", localisedTitle="Ελληνικά"),
+    InitWikiSite(code="bg", title="Bulgarian", localisedTitle="Български"),
+    InitWikiSite(code="be", title="Belarusian", localisedTitle="Беларуская"),
+    InitWikiSite(code="mk", title="Macedonian", localisedTitle="Македонски"),
+    InitWikiSite(code="my", title="Burmese", localisedTitle="မြန်မာဘာသာ"),
+    InitWikiSite(code="uk", title="Ukrainian", localisedTitle="Українська"),
+)
 
 val initialBookData = listOf(
 

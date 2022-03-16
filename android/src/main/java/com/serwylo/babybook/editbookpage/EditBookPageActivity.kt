@@ -290,7 +290,7 @@ class EditBookPageActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.view_in_wikipedia -> {
                 viewModel.wikiPage.value?.title?.also { title ->
-                    viewInWikipedia(this, title)
+                    viewInWikipedia(this, viewModel.wikiSite, title)
                 }
                 return true
             }
@@ -386,7 +386,7 @@ class EditBookPageActivity : AppCompatActivity() {
                         viewModel.isSearchingPages.postValue(true)
 
                         try {
-                            val searchResults = searchWikiTitles(constraint.toString())
+                            val searchResults = searchWikiTitles(viewModel.wikiSite.url(), constraint.toString())
 
                             if (latestSearchTerms == constraint.toString()) {
                                 Log.i("WikiSearch", "Found ${searchResults.results.size} results for $constraint which matches the latest search we performed: $latestSearchTerms")
@@ -395,6 +395,7 @@ class EditBookPageActivity : AppCompatActivity() {
                             }
                         } catch (e: Throwable) {
                             withContext(Dispatchers.Main) {
+                                Log.e("WikiSearch", "Error searching wiki pages: ${e.message}", e)
                                 Toast.makeText(applicationContext, "An error occurred searching wikipedia. Are you connected to the internet?", Toast.LENGTH_LONG).show()
                             }
                         }

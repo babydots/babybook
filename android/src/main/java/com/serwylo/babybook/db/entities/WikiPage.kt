@@ -1,9 +1,18 @@
 package com.serwylo.babybook.db.entities
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = WikiSite::class,
+            parentColumns = ["id"],
+            childColumns = ["wikiSiteId"],
+        )
+    ]
+)
 data class WikiPage(
     val title: String,
     val text: String,
@@ -18,6 +27,8 @@ data class WikiPage(
      * then at that point we will go and fetch all the rest of the images.
      */
     val imagesFetched: Boolean = false,
+
+    val wikiSiteId: Long,
 
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

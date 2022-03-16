@@ -4,8 +4,10 @@ import com.serwylo.babybook.mediawiki.makePages
 import com.serwylo.babybook.pdf.generatePdf
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.net.URL
 
 fun makeBook(
+    wikiUrl: URL,
     bookTitle: String,
     pageTitles: List<String>,
     config: BookConfig = BookConfig.Default,
@@ -26,7 +28,7 @@ fun makeBook(
 
         val pages: List<Page>
         runBlocking {
-            pages = makePages(pageTitles, config, cacheDir)
+            pages = makePages(wikiUrl, pageTitles, config, cacheDir)
         }
 
         val tmpPdfFile = File.createTempFile("${filename}.", ".tmp")
