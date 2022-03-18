@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         if (!Preferences.isOnboardingComplete(this)) {
             Preferences.setOnboardingComplete(this)
             startActivity(Intent(this, OnboardingActivity::class.java))
+        } else {
+            Changelog.show(this)
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)

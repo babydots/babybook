@@ -106,4 +106,6 @@ dependencies {
 
     implementation 'androidx.preference:preference-ktx:1.2.0'
 
+    implementation 'io.github.tonnyl:whatsnew:0.1.7'
+
 }
