@@ -8,7 +8,10 @@ import com.serwylo.babybook.mediawiki.loadWikiPage
 import kotlinx.cli.*
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.net.URL
 import kotlin.io.path.createTempDirectory
+
+val wikiUrl = URL("https://en.wikipedia.org")
 
 fun main(args: Array<String>) {
 
@@ -48,14 +51,14 @@ class Wiki: Subcommand("wiki", "Fetch data from wikipedia") {
 
         println("Downloading wiki page \"$pageTitle\" to ${pageCacheDir.absolutePath}")
         runBlocking {
-            val wikiPage = loadWikiPage(pageTitle, pageCacheDir)
+            val wikiPage = loadWikiPage(wikiUrl, pageTitle, pageCacheDir)
 
             if (singleImage == true) {
                 wikiPage.getImageNamesOfInterest().firstOrNull()?.also { imageName ->
-                    downloadWikiImage(imageName, pageCacheDir)
+                    downloadWikiImage(wikiUrl, imageName, pageCacheDir)
                 }
             } else {
-                downloadImages(wikiPage.getImageNamesOfInterest(), pageCacheDir).forEach { file ->
+                downloadImages(wikiUrl, wikiPage.getImageNamesOfInterest(), pageCacheDir).forEach { file ->
                     println("Image: ${file.file.name}")
                     println("  ${file.title}")
                     println("  ${file.description}")

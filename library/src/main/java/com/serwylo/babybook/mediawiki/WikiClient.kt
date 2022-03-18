@@ -19,31 +19,38 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.StringReader
+import java.net.URL
 import java.net.URLDecoder
 import java.nio.charset.Charset
-import java.security.MessageDigest
 import java.util.*
 
+/**
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
 suspend fun makePages(
+    wikiUrl: URL,
     pageTitles: List<String>,
     config: BookConfig,
     cacheDir: File,
 ): List<Page> = coroutineScope {
     val pageJobs = pageTitles.map { pageTitle ->
-        async(Dispatchers.IO) { makeBookPageFromWikiPage(pageTitle, config, cacheDir) }
+        async(Dispatchers.IO) { makeBookPageFromWikiPage(wikiUrl, pageTitle, config, cacheDir) }
     }
 
     return@coroutineScope pageJobs.awaitAll()
 }
 
-suspend fun makeBookPageFromWikiPage(title: String, config: BookConfig, cacheDir: File): Page {
+/**
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+suspend fun makeBookPageFromWikiPage(wikiUrl: URL, title: String, config: BookConfig, cacheDir: File): Page {
     val pageCacheDir = File(cacheDir, title)
     if (!pageCacheDir.exists()) {
         pageCacheDir.mkdirs()
     }
 
-    val page = loadWikiPage(title, pageCacheDir)
-    val images = downloadImages(page.getImageNamesOfInterest(), pageCacheDir)
+    val page = loadWikiPage(wikiUrl, title, pageCacheDir)
+    val images = downloadImages(wikiUrl, page.getImageNamesOfInterest(), pageCacheDir)
 
     val text = when (config.summary) {
         BookConfig.Summary.Full -> page.parseParagraphs()[0]
@@ -63,7 +70,7 @@ fun processTitle(title: String): String {
 
 val nonRedirectingHttp = HttpClient(CIO) {
     install(JsonFeature)  {
-        serializer = GsonSerializer() {
+        serializer = GsonSerializer {
             setLenient()
         }
     }
@@ -74,7 +81,7 @@ val nonRedirectingHttp = HttpClient(CIO) {
 
 val http = HttpClient(CIO) {
     install(JsonFeature)  {
-        serializer = GsonSerializer() {
+        serializer = GsonSerializer {
             setLenient()
         }
     }
@@ -102,7 +109,7 @@ fun deleteUninterestingCachedImages(cacheDir: File) {
 }
 
 /**
- * List of icons, WikeMedia logos, and other uninteresting images that we have seen in our
+ * List of icons, WikiMedia logos, and other uninteresting images that we have seen in our
  * experience which we don't care for.
  */
 private val knownUninterestingImages: Set<String> = setOf(
@@ -129,19 +136,18 @@ private val allowedImageExtensions = setOf(
  * more heuristics, such as length, type of words found in each, etc.
  */
 fun pickSentences(sentences: List<String>, numSentences: Int = 1): List<String> {
-    return if (sentences.isEmpty()) {
-        listOf("")
-    } else if (sentences.size == 1) {
-        sentences
-    } else {
-        // The first sentence is often a bit boring and technical/dry.
-        // The second sentence tends to be much more fun.
-        listOf(sentences[0])
+    return when(sentences.size) {
+        0 -> listOf("")
+        1 -> sentences
+        else -> listOf(sentences[0])
     }
 }
 
-suspend fun searchWikiTitles(searchTerms: String): WikiSearchResults {
-    val url = "https://simple.wikipedia.org/w/api.php?action=query&list=search&srsearch=$searchTerms&utf8=&format=json"
+/**
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+suspend fun searchWikiTitles(wikiUrl: URL, searchTerms: String): WikiSearchResults {
+    val url = "$wikiUrl/w/api.php?action=query&list=search&srsearch=$searchTerms&utf8=&format=json"
     println("Searching wiki pages from $url")
 
     val response: ParsedWikiSearchResults
@@ -207,8 +213,10 @@ data class ParsedWikiSearchResults(
 /**
  * Fetch metadata about a wikipedia page.
  * Will cache the response, and if a cached response already exists on disk, will use that.
+ *
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
  */
-suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(Dispatchers.IO) {
+suspend fun loadWikiPage(wikiUrl: URL, title: String, cacheDir: File): WikiPage = withContext(Dispatchers.IO) {
     val cachedFile = File(cacheDir, "${title}.json")
     if (cachedFile.exists()) {
         try {
@@ -221,7 +229,7 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(
         }
     }
 
-    val url = "https://simple.wikipedia.org/w/api.php?action=parse&page=$title&format=json"
+    val url = "$wikiUrl/w/api.php?action=parse&page=$title&format=json"
     println("Loading wiki data from $url")
 
     var response: ParsedWikiPage
@@ -234,7 +242,7 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(
         if (redirect.size > 0) {
 
             val redirectedTitle = redirect.text()
-            val redirectedUrl = "https://simple.wikipedia.org/w/api.php?action=parse&page=$redirectedTitle&format=json"
+            val redirectedUrl = "$wikiUrl/w/api.php?action=parse&page=$redirectedTitle&format=json"
             println("Redirected to \"$redirectedTitle\". Loading wiki data from $redirectedUrl")
 
             response = http.get(redirectedUrl)
@@ -248,11 +256,14 @@ suspend fun loadWikiPage(title: String, cacheDir: File): WikiPage = withContext(
     return@withContext responseWikiPage
 }
 
-suspend fun downloadImages(imageNames: List<String>, destDir: File): List<WikipediaCommonsFile> = coroutineScope {
+/**
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+suspend fun downloadImages(wikiUrl: URL, imageNames: List<String>, destDir: File): List<WikipediaCommonsFile> = coroutineScope {
     println("Downloading ${imageNames.size} images (but really just downloading the first for now).")
 
     val jobs = imageNames.map { filename ->
-        async(Dispatchers.IO) { downloadWikiImage(filename, destDir) }
+        async(Dispatchers.IO) { downloadWikiImage(wikiUrl, filename, destDir) }
     }
 
     return@coroutineScope jobs.awaitAll().filterNotNull()
@@ -313,7 +324,10 @@ private suspend fun downloadWikiImageMetadata(filename: String): WikipediaCommon
 
 }
 
-private suspend fun downloadWikiImageContents(filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): File? {
+/**
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+private suspend fun downloadWikiImageContents(wikiUrl: URL, filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): File? {
     val outputFile = File(destDir, filename)
     if (outputFile.exists()) {
         println("No need to download $filename, already downloaded.")
@@ -331,7 +345,7 @@ private suspend fun downloadWikiImageContents(filename: String, destDir: File, l
     // then it will fail.
     //
     // This is because the image has actually been renamed, as can be seen when you try to view the
-    // image via https://simple.wikipedia.org/wiki/Special:Redirect/file/Farmer_plowing.jpg which
+    // image via https://en.wikipedia.org/wiki/Special:Redirect/file/Farmer_plowing.jpg which
     // results in a 301 to https://upload.wikimedia.org/wikipedia/commons/a/a2/04-09-12-Schaupfl%C3%BCgen-Fahrenwalde-RalfR-IMG_1232.jpg
     //
     // Therefore, if we get a 404 for the first more predictable URL (which assume no redirects)
@@ -347,9 +361,9 @@ private suspend fun downloadWikiImageContents(filename: String, destDir: File, l
         }
 
         println("Noticed an error (${originalException.message}) fetching $url, so will try to see if it has been redirected to a different image.")
-        val newFilename = discoverFilenameFromRenamedImage(filename)
+        val newFilename = discoverFilenameFromRenamedImage(wikiUrl, filename)
         if (newFilename == null) {
-            println("Still couldn't find image $filename, so giving up.");
+            println("Still couldn't find image $filename, so giving up.")
             return null
         }
 
@@ -372,11 +386,13 @@ private suspend fun downloadWikiImageContents(filename: String, destDir: File, l
  * @param lookForRenamedImageOnFailure After implementing this functionality for the "Horse" wiki
  * page, it became clear that the renamed file was included twice and so perhaps it isn't really
  * all that important to follow up on renamed images.
+ *
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
  */
-suspend fun downloadWikiImage(filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): WikipediaCommonsFile? {
+suspend fun downloadWikiImage(wikiUrl: URL, filename: String, destDir: File, lookForRenamedImageOnFailure: Boolean = false): WikipediaCommonsFile? {
 
     val metadata = downloadWikiImageMetadata(filename) ?: return null
-    val file = downloadWikiImageContents(filename, destDir, lookForRenamedImageOnFailure) ?: return null
+    val file = downloadWikiImageContents(wikiUrl, filename, destDir, lookForRenamedImageOnFailure) ?: return null
 
     return WikipediaCommonsFile(
         file = file,
@@ -388,8 +404,11 @@ suspend fun downloadWikiImage(filename: String, destDir: File, lookForRenamedIma
 
 }
 
-private suspend fun discoverFilenameFromRenamedImage(filename: String): String? {
-    val sourceUrl = "https://simple.wikipedia.org/wiki/Special:Redirect/file/$filename"
+/**
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+private suspend fun discoverFilenameFromRenamedImage(wikiUrl: URL, filename: String): String? {
+    val sourceUrl = "$wikiUrl/wiki/Special:Redirect/file/$filename"
     println("Checking if $filename has been renamed by looking for redirects in a HEAD request to $sourceUrl")
     try {
         val headResponse: HttpResponse = nonRedirectingHttp.head(sourceUrl)
@@ -431,9 +450,9 @@ class WikiPage(
         return jsoup!!
     }
 
-    fun getHtml() = page.parse.text.value
+    private fun getHtml() = page.parse.text.value
 
-    fun getAllImageNames(): List<String> {
+    private fun getAllImageNames(): List<String> {
 
         val imageNamesFromJson = page.parse.images
 
@@ -450,7 +469,7 @@ class WikiPage(
 
     }
 
-    fun getInfoBoxImages(): List<String> {
+    private fun getInfoBoxImages(): List<String> {
         return Jsoup.parse(getHtml())
             .select(".infobox-image img")
             .map { it.attr("src") }
@@ -473,16 +492,18 @@ class WikiPage(
     fun parseParagraphs(): List<String> {
         val html = getHtml()
 
-        val doc = Jsoup.parse(html);
+        val doc = Jsoup.parse(html)
         val infobox = doc.select("table.infobox")
         val body = doc.select(".mw-parser-output")
 
         return body.select("p")
+            .asSequence()
             .map { it.text().trim() }
             .filter { it.isNotEmpty() }
             .filterNot { p -> infobox.select("p").map { it.text() }.contains(p) } // There is sometimes <p> tags in the info box, we don't want those.
             .map { it.replace(Regex("\\[.*?\\]"), "") }
             .map { it.replace(Regex(" \\(.*?\\)"), "") }
+            .toList()
     }
 
 }

@@ -5,7 +5,10 @@ import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.mediawiki.*
 import java.io.File
 import java.io.IOException
+import java.net.URL
 import java.nio.file.Files
+
+val wikiUrl = URL("https://en.wikipedia.org")
 
 object WikiCacheService {
 
@@ -24,13 +27,13 @@ object WikiCacheService {
             return cached
         }
 
-        val result = searchWikiTitles(queryTerms)
+        val result = searchWikiTitles(wikiUrl, queryTerms)
         cachedSearchResults[queryTerms] = result
         return result
     }
 
     suspend fun getBookPage(title: String): Page {
-        return makeBookPageFromWikiPage(title, BookConfig.Default, cacheDir)
+        return makeBookPageFromWikiPage(wikiUrl, title, BookConfig.Default, cacheDir)
     }
 
     suspend fun getWikiImage(title: String, imageName: String): File {
@@ -38,7 +41,7 @@ object WikiCacheService {
         val file = File(dir, imageName)
 
         if (!file.exists()) {
-            downloadWikiImage(imageName, dir)
+            downloadWikiImage(wikiUrl, imageName, dir)
         }
 
         if (!file.exists()) {

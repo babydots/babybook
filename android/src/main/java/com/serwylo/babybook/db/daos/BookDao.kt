@@ -8,7 +8,7 @@ import com.serwylo.babybook.db.entities.*
 interface BookDao {
 
     @Transaction
-    @Query("SELECT BookPage.*, WikiPage.id as wikiPage_id, WikiPage.text as wikiPage_text, WikiPage.title as wikiPage_title, WikiPage.imagesFetched as wikiPage_imagesFetched, WikiImage.id as wikiImage_id, WikiImage.filename as wikiImage_filename, WikiImage.title as wikiImage_title, WikiImage.name as wikiImage_name, WikiImage.author as wikiImage_author, WikiImage.license as wikiImage_license, WikiImage.wikiPageId as wikiImage_wikiPageId  FROM BookPage LEFT JOIN WikiPage ON (WikiPage.id = BookPage.wikiPageId) LEFT JOIN WikiImage ON (WikiImage.id = BookPage.wikiImageId) WHERE BookPage.bookId = :bookId ORDER BY BookPage.pageNumber ASC")
+    @Query("SELECT BookPage.*, WikiPage.id as wikiPage_id, WikiPage.wikiSiteId as wikiPage_wikiSiteId, WikiPage.text as wikiPage_text, WikiPage.title as wikiPage_title, WikiPage.imagesFetched as wikiPage_imagesFetched, WikiImage.id as wikiImage_id, WikiImage.filename as wikiImage_filename, WikiImage.title as wikiImage_title, WikiImage.name as wikiImage_name, WikiImage.author as wikiImage_author, WikiImage.license as wikiImage_license, WikiImage.wikiPageId as wikiImage_wikiPageId  FROM BookPage LEFT JOIN WikiPage ON (WikiPage.id = BookPage.wikiPageId) LEFT JOIN WikiImage ON (WikiImage.id = BookPage.wikiImageId) WHERE BookPage.bookId = :bookId ORDER BY BookPage.pageNumber ASC")
     fun getPageEditingData(bookId: Long): LiveData<List<PageEditingData>>
 
     @Query("SELECT Book.*, WikiImage.filename as coverPageImagePath FROM Book LEFT JOIN BookPage ON BookPage.id = (SELECT bp.id FROM BookPage as bp WHERE bp.wikiImageId IS NOT NULL AND bp.bookId = Book.id ORDER BY bp.pageNumber ASC LIMIT 0, 1) LEFT JOIN WikiImage ON (WikiImage.id = BookPage.wikiImageId)")
@@ -35,8 +35,20 @@ interface BookDao {
     @Insert
     suspend fun insert(image: WikiImage): Long
 
+    @Insert
+    suspend fun insert(site: WikiSite): Long
+
+    @Query("SELECT * FROM Settings LIMIT 0, 1")
+    suspend fun getSettings(): Settings
+
     @Query("SELECT * FROM Book WHERE id = :id")
     suspend fun getBook(id: Long): Book
+
+    @Query("SELECT * FROM WikiSite WHERE id = :id")
+    suspend fun getWikiSite(id: Long): WikiSite
+
+    @Query("SELECT * FROM WikiSite")
+    suspend fun findAllWikiSites(): List<WikiSite>
 
     @Query("SELECT * FROM Book WHERE id = :id")
     fun getBookLive(id: Long): LiveData<Book>
@@ -55,6 +67,9 @@ interface BookDao {
 
     @Update
     suspend fun update(wikiPage: WikiPage)
+
+    @Update
+    suspend fun update(settings: Settings)
 
     @Delete(entity = Book::class)
     suspend fun delete(book: Book)

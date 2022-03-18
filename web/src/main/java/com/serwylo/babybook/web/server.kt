@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
                 val pages = call.parameters["pages"] ?: ""
                 if (title.isNotEmpty() && pages.isNotEmpty()) {
                     val pageTitles = pages.split("_")
-                    val file = makeBook(title, pageTitles)
+                    val file = makeBook(wikiUrl, title, pageTitles)
                     call.response.header(
                         HttpHeaders.ContentDisposition,
                         ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, "${title}.pdf").toString()

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.serwylo.babybook.db.entities.BookPage
 import com.serwylo.babybook.db.entities.WikiImage
 import com.serwylo.babybook.db.entities.WikiPage
+import com.serwylo.babybook.db.entities.WikiSite
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.mediawiki.downloadWikiImage
 import com.serwylo.babybook.mediawiki.loadWikiPage
@@ -32,10 +33,16 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
     val isSearchingPages = MutableLiveData(false)
     val isPreparingPage = MutableLiveData(false)
 
+    lateinit var wikiSite: WikiSite
+
     init {
         viewModelScope.launch {
+            wikiSite = withContext(Dispatchers.IO) { repository.getWikiSite(bookId) }
+        }
+
+        viewModelScope.launch {
             if (existingBookPageId > 0) {
-                val bookPage = repository.getBookPage(existingBookPageId)
+                val bookPage = withContext(Dispatchers.IO) { repository.getBookPage(existingBookPageId) }
 
                 pageTitle.value = bookPage.title
                 pageText.value = bookPage.text
@@ -114,7 +121,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
         val details = fetchPageDataFromWiki(title)
 
         Log.d(TAG, "preparePage: Wikipedia page details loaded, will save to DB.")
-        val newWikiPage = repository.addNewWikiPage(title, details.parseParagraphs().firstOrNull() ?: "")
+        val newWikiPage = repository.addNewWikiPage(wikiSite, title, details.parseParagraphs().firstOrNull() ?: "")
 
         withContext(Dispatchers.Main) {
             wikiPage.value = newWikiPage
@@ -176,7 +183,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
 
     private suspend fun fetchPageDataFromWiki(title: String) = withContext(Dispatchers.IO) {
         val dir = ensureDataDir(title)
-        loadWikiPage(title, dir)
+        loadWikiPage(wikiSite.url(), title, dir)
     }
 
     private suspend fun fetchImageFromWiki(wikiPage: WikiPage, details: FetchedWikiPage): WikiImage? = withContext(Dispatchers.IO) {
@@ -188,7 +195,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
         } else {
             Log.d(TAG, "preparePage: Fetching image $imageName (in total there are ${details.getImageNamesOfInterest().size} in total - they will be downloaded later when we ask to view all images)")
             val dir = ensureDataDir(wikiPage.title)
-            val file = downloadWikiImage(imageName, dir)
+            val file = downloadWikiImage(wikiSite.url(), imageName, dir)
             if (file == null) {
                 Log.w(TAG, "Couldn't find image for $imageName, so ignoring.")
                 null
@@ -276,7 +283,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
             }
 
             // Expect the JSON blob of this to be cached, so shouldn't worry about this extra call...
-            val details = loadWikiPage(wikiPage.title, dir)
+            val details = loadWikiPage(wikiSite.url(), wikiPage.title, dir)
             val imageNames = details.getImageNamesOfInterest()
 
             Log.d(TAG, "ensureImagesDownloaded: Ensuring all ${imageNames.size} images are available...")
@@ -285,7 +292,7 @@ class EditBookPageViewModel(private val repository: BookRepository, private val 
                 val outstandingImages = imageNames.subList(1, imageNames.size).map { filename ->
                     async {
                         Log.d(TAG, "ensureImagesDownloaded: Downloading $filename...")
-                        val file = downloadWikiImage(filename, dir)
+                        val file = downloadWikiImage(wikiSite.url(), filename, dir)
 
                         if (file == null) {
                             Log.w(TAG, "ensureImagesDownloaded: Couldn't find image for $filename, so ignoring.")

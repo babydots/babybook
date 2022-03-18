@@ -28,7 +28,8 @@ class BookRepository(private val dao: BookDao) {
     }
 
     suspend fun addNewBook(): Book = withContext(Dispatchers.IO) {
-        val id = dao.insert(Book(title = "New Book"))
+        val settings = dao.getSettings()
+        val id = dao.insert(Book(title = "New Book", wikiSiteId = settings.wikiSiteId))
         dao.getBook(id)
     }
 
@@ -89,8 +90,8 @@ class BookRepository(private val dao: BookDao) {
 
     fun findWikiImageByName(filename: String): WikiImage? = dao.findWikiImageByName(filename)
 
-    suspend fun addNewWikiPage(title: String, text: String): WikiPage = withContext(Dispatchers.IO) {
-        val page = WikiPage(title, text)
+    suspend fun addNewWikiPage(wikiSite: WikiSite, title: String, text: String): WikiPage = withContext(Dispatchers.IO) {
+        val page = WikiPage(title, text, wikiSiteId = wikiSite.id)
         val id = dao.insert(page)
         page.copy(id = id)
     }
@@ -122,6 +123,25 @@ class BookRepository(private val dao: BookDao) {
 
     suspend fun recordImagesAsDownloaded(wikiPage: WikiPage) {
         dao.update(wikiPage.copy(imagesFetched = true))
+    }
+
+    suspend fun getWikiSite(bookId: Long): WikiSite = withContext(Dispatchers.IO) {
+        val book = dao.getBook(bookId)
+        dao.getWikiSite(book.wikiSiteId)
+    }
+
+    suspend fun getAllWikiSites(): List<WikiSite> = withContext(Dispatchers.IO) {
+        dao.findAllWikiSites()
+    }
+
+    suspend fun getDefaultWikiSite(): WikiSite = withContext(Dispatchers.IO) {
+        val settings = dao.getSettings()
+        dao.getWikiSite(settings.wikiSiteId)
+    }
+
+    suspend fun setDefaultWikiSite(site: WikiSite) = withContext(Dispatchers.IO) {
+        val settings = dao.getSettings()
+        dao.update(settings.copy(wikiSiteId = site.id))
     }
 
 }

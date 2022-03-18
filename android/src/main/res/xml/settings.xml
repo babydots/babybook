@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference
-        android:key="show_onboarding"
-        android:title="Show start screen"
-        android:summary="If you missed start screen the first time" />
-    <Preference
-        android:key="show_content_warning"
-        android:title="Show content warning"
-        android:summary="Warning about searching Wikipedia" />
+    <PreferenceCategory
+        android:title="Book Settings">
+        <ListPreference
+            android:key="select_wiki_site"
+            android:title="Wikipedia"
+            android:summary="Simple English Wikipedia" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="App Information">
+        <Preference
+            android:key="show_onboarding"
+            android:title="Show start screen"
+            android:summary="If you missed start screen the first time" />
+        <Preference
+            android:key="show_content_warning"
+            android:title="Show content warning"
+            android:summary="Warning about searching Wikipedia" />
+    </PreferenceCategory>
 </PreferenceScreen>

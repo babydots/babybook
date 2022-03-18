@@ -12,8 +12,8 @@ android {
         applicationId "com.serwylo.babybook"
         minSdk 21
         targetSdk 31
-        versionCode 6
-        versionName "0.5.0"
+        versionCode 7
+        versionName "0.6.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -105,5 +105,7 @@ dependencies {
     implementation 'com.tbuonomo:dotsindicator:4.2'
 
     implementation 'androidx.preference:preference-ktx:1.2.0'
+
+    implementation 'io.github.tonnyl:whatsnew:0.1.7'
 
 }
