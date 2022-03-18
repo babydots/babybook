@@ -1,0 +1,3 @@
+Multi-language Wikipedia!
+
+Select from over 70 different Wikipedia sites from the settings. Once selected, all newly created books will fetch text and images from this Wiki. Currently supports all Wikipedia's with over 100,000 articles.
