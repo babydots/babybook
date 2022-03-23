@@ -1,0 +1,4 @@
+New feature:
+ * Volume buttons change pages when viewing books (thanks to @xmha97 for the idea)
+
+Donate to support further development of Baby Book.
