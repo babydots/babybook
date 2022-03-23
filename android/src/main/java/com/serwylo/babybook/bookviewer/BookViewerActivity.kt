@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -80,6 +81,14 @@ class BookViewerActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_DOWN -> viewModel.turnToNextPage()
+            KeyEvent.KEYCODE_VOLUME_UP -> viewModel.turnToPreviousPage()
+        }
+        return true
     }
 
     private fun startPdfExport() {
