@@ -27,6 +27,11 @@ object Changelog {
                 R.drawable.ic_language,
             ),
             WhatsNewItem(
+                "Volume buttons change pages",
+                "When reading a book, you can now press volume down to go to the next page, or up to go to the previous.",
+                R.drawable.ic_book,
+            ),
+            WhatsNewItem(
                 "Support Baby Book Development",
                 Html.fromHtml("Baby Book is and always will be free and open source. You can show your support and contribute to its further development by donating via <a href=\"https://liberapay.com/BabyDots\">Liberapay</a> or <a href=\"https://github.com/sponsors/pserwylo\">GitHub Sponsors</a>."),
                 R.drawable.ic_heart
