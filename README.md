@@ -10,11 +10,11 @@ Web version: http://book.serwylo.com (running on a free and small Heroku dyno, s
 
 ## Contributing
 
-### Donations
+### Support
 
 Baby Book is an open source, GPLv3 application. It will always be freely available via F-Droid, or for anyone to build, fork, or improve via the source code.
 
-If you wish to support the development financially, you can do so via:
+If you wish to support further development, you can do so via:
 
 * [Liberapay](https://liberapay.com/BabyDots/donate)
 * [GitHub sponsors](https://github.com/sponsors/pserwylo)

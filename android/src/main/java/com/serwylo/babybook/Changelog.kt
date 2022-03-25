@@ -33,7 +33,7 @@ object Changelog {
             ),
             WhatsNewItem(
                 "Support Baby Book Development",
-                Html.fromHtml("Baby Book is and always will be free and open source. You can show your support and contribute to its further development by donating via <a href=\"https://liberapay.com/BabyDots\">Liberapay</a> or <a href=\"https://github.com/sponsors/pserwylo\">GitHub Sponsors</a>."),
+                Html.fromHtml("Baby Book is and always will be free and open source. If you are able, please <a href=\"https://github.com/babydots/babybook#support\">show your support and contribute to its further development</a>."),
                 R.drawable.ic_heart
             ),
         ).apply {
