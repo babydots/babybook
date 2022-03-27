@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +24,9 @@ import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
 import com.squareup.picasso.Picasso
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageSobelEdgeDetectionFilter
+import jp.wasabeef.picasso.transformations.gpu.SketchFilterTransformation
+import jp.wasabeef.picasso.transformations.gpu.ToonFilterTransformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -190,6 +194,8 @@ class BookViewerActivity : AppCompatActivity() {
                 if (image != null) {
                     Picasso.get()
                         .load(image)
+                        .transform(ToonFilterTransformation(this@BookViewerActivity))
+                        // .transform(SketchFilterTransformation(this@BookViewerActivity))
                         .fit()
                         .centerCrop()
                         .into(binding.image)
