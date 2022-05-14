@@ -22,13 +22,8 @@ object Changelog {
 
         return WhatsNew.newInstance(
             WhatsNewItem(
-                "Multi-language Wikipedia",
-                "Select from over 70 different Wikipedia sites from the settings. Once selected, all newly created books will fetch text and images from this Wiki. Currently supports all Wikipedia's with over 100,000 articles.",
-                R.drawable.ic_language,
-            ),
-            WhatsNewItem(
-                "Volume buttons change pages",
-                "When reading a book, you can now press volume down to go to the next page, or up to go to the previous.",
+                "Swipe (or tap) to turn pages",
+                "Select your preferred option from the settings menu. Volume can still be used to change pages too.",
                 R.drawable.ic_book,
             ),
             WhatsNewItem(

@@ -1,0 +1,5 @@
+New features:
+ * Choose between swiping or buttons to change pages (use settings menu to choose). Volume buttons still work to turn pages.
+ * Paper background when loading images.
+
+Donate to support further development of Baby Book.
