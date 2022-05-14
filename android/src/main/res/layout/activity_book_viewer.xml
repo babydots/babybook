@@ -4,54 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".bookviewer.BookViewerActivity">
+    tools:context=".bookviewer.BookViewerActivity"
+    android:background="@drawable/paper">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        tools:src="@tools:sample/backgrounds/scenic" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constrainedWidth="true"
-        tools:text="Hubble Space Telescope"
-        android:textAppearance="?attr/textAppearanceHeadline1"
-        android:textColor="@color/black"
-        android:textSize="42sp"
-        android:background="#88ffffff"
-        android:padding="12dp"
-        android:layout_margin="32dp" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="A bug is a thing which is nice to look at but we don't touch them."
-        android:textAppearance="?attr/textAppearanceBody1"
-        android:textColor="@color/black"
-        android:background="#88ffffff"
-        android:padding="12dp"
-        android:layout_margin="16dp" />
+    />
 
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/previous"
+        android:id="@+id/previous_overlay"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -59,14 +26,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_percent=".5"
         app:layout_constraintHorizontal_bias="0"
-        android:alpha="0.2"
+        android:alpha="0.3"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_previous"
         android:scaleType="fitCenter"
         android:adjustViewBounds="true"/>
 
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/next"
+        android:id="@+id/next_overlay"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -74,7 +41,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_percent=".5"
         app:layout_constraintHorizontal_bias="1"
-        android:alpha="0.2"
+        android:alpha="0.3"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_next"
         android:scaleType="fitCenter"

@@ -1,4 +1,5 @@
 <resources>
+
     <string name="app_name">Baby Book</string>
     <string name="title_activity_edit_book">EditBookActivity</string>
     <string name="prompt_email">Email</string>
@@ -9,4 +10,15 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+
+    <string-array name="page_turn_type_entries">
+        <item>Swiping</item>
+        <item>Tapping page edges</item>
+    </string-array>
+
+    <string-array name="page_turn_type_entry_values">
+        <item>swipe</item>
+        <item>buttons_overlayed</item>
+    </string-array>
+
 </resources>

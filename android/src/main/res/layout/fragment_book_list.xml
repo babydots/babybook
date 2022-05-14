@@ -7,30 +7,31 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/edit_mode_wrapper"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/edit_mode"
-        android:text="Tap a book to edit, or "
-        app:layout_constraintTop_toTopOf="@id/add_book_button"
-        app:layout_constraintBottom_toBottomOf="@id/add_book_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/add_book_button"
-        app:layout_constraintHorizontal_chainStyle="packed" />
-
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/add_book_button"
-        android:text="Add a new book"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/list"
-        app:layout_constraintStart_toEndOf="@id/edit_mode"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:background="@color/white"
+        android:gravity="center">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/edit_mode"
+            android:text="Tap a book to edit, or " />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/add_book_button"
+            android:text="Add a new book"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
@@ -40,7 +41,7 @@
         app:layoutManager="LinearLayoutManager"
         tools:context=".booklist.BookListFragment"
         tools:listitem="@layout/fragment_book_list_item"
-        app:layout_constraintTop_toBottomOf="@id/add_book_button"
+        app:layout_constraintTop_toBottomOf="@id/edit_mode_wrapper"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
