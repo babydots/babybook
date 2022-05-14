@@ -28,6 +28,15 @@ class SettingsActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             addPreferencesFromResource(R.xml.settings)
 
+            findPreference<ListPreference>("page_turn_type")?.apply {
+                setDefaultValue(Preferences.PAGE_TURN_TYPE_SWIPING)
+                summaryProvider = Preference.SummaryProvider { preference: ListPreference ->
+                    val prefVal = preference.value ?: Preferences.PAGE_TURN_TYPE_SWIPING
+                    val index = context.resources.getStringArray(R.array.page_turn_type_entry_values).indexOf(prefVal)
+                    context.resources.getStringArray(R.array.page_turn_type_entries)[index]
+                }
+            }
+
             findPreference<ListPreference>("select_wiki_site")?.apply {
                 lifecycleScope.launchWhenCreated {
 

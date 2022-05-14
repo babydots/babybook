@@ -1,28 +1,30 @@
 package com.serwylo.babybook.bookviewer
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.serwylo.babybook.Preferences
 import com.serwylo.babybook.R
 import com.serwylo.babybook.attribution.AttributionActivity
 import com.serwylo.babybook.book.BookConfig
 import com.serwylo.babybook.book.Page
 import com.serwylo.babybook.databinding.ActivityBookViewerBinding
 import com.serwylo.babybook.db.AppDatabase
-import com.serwylo.babybook.db.entities.PageEditingData
 import com.serwylo.babybook.db.entities.imagePathToFile
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,8 +32,35 @@ import java.io.*
 
 class BookViewerActivity : AppCompatActivity() {
 
+    private lateinit var pageTurnType: String
+
     private lateinit var viewModel: BookViewerViewModel
     private lateinit var binding: ActivityBookViewerBinding
+
+    private val onPageChange = object: ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            binding.apply {
+                val count = (pager.adapter?.itemCount ?: 0)
+                nextOverlay.visibility = if (pageTurnType == Preferences.PAGE_TURN_TYPE_BUTTONS_OVERLAYED && position < count - 1) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+
+                previousOverlay.visibility = if (pageTurnType == Preferences.PAGE_TURN_TYPE_BUTTONS_OVERLAYED && position > 0) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        pageTurnType = Preferences.pageTurnType(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -157,12 +186,15 @@ class BookViewerActivity : AppCompatActivity() {
                 Toast.makeText(this, "This book does not have any pages yet.", Toast.LENGTH_SHORT).show()
                 finish()
             } else {
-                showPage(firstPage)
+                val pagerAdapter = ScreenSlidePagerAdapter(this)
+                binding.pager.adapter = pagerAdapter
+                binding.pager.offscreenPageLimit = 3
+                binding.pager.registerOnPageChangeCallback(onPageChange)
             }
         }
 
-        binding.previous.setOnClickListener { viewModel.turnToPreviousPage() }
-        binding.next.setOnClickListener { viewModel.turnToNextPage() }
+        binding.previousOverlay.setOnClickListener { viewModel.turnToPreviousPage() }
+        binding.nextOverlay.setOnClickListener { viewModel.turnToNextPage() }
 
         viewModel.currentPageIndex.observe(this) { currentPage ->
             // Be defensive here, because it is almost always guaranteed that we receive a
@@ -171,34 +203,9 @@ class BookViewerActivity : AppCompatActivity() {
             // by the observer on viewModel.bookWithPages).
             val pages = viewModel.pages.value
             if (pages != null && pages.size > currentPage) {
-                showPage(pages[currentPage])
+                binding.pager.currentItem = currentPage
             }
         }
-    }
-
-    private fun showPage(page: PageEditingData) {
-
-        binding.previous.visibility = if (viewModel.hasPreviousPage()) View.VISIBLE else View.GONE
-        binding.next.visibility = if (viewModel.hasNextPage()) View.VISIBLE else View.GONE
-
-        if (page.image == null) {
-            binding.image.visibility = View.GONE
-        } else {
-            binding.image.visibility = View.VISIBLE
-            lifecycleScope.launch {
-                val image = page.image(this@BookViewerActivity)
-                if (image != null) {
-                    Picasso.get()
-                        .load(image)
-                        .fit()
-                        .centerCrop()
-                        .into(binding.image)
-                }
-            }
-        }
-
-        binding.title.text = page.title()
-        binding.text.text = page.text()
     }
 
     companion object {
@@ -209,6 +216,12 @@ class BookViewerActivity : AppCompatActivity() {
 
         private const val RESULT_CREATE_FILE = 1
 
+    }
+
+    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
+        override fun getItemCount(): Int = viewModel.pages.value!!.size
+
+        override fun createFragment(position: Int): Fragment = BookPageFragment(viewModel.pages.value!![position])
     }
 
 }
