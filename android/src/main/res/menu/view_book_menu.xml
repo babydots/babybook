@@ -9,10 +9,16 @@
         app:showAsAction="ifRoom" />-->
 
     <item
+        android:id="@+id/lock"
+        android:title="Lock screen"
+        android:icon="@drawable/ic_lock"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/view_in_wikipedia"
         android:title="Read more on Wikipedia"
         android:icon="@drawable/ic_link"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/pdf"
