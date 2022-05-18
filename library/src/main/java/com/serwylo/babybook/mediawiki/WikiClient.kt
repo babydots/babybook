@@ -3,6 +3,7 @@ package com.serwylo.babybook.mediawiki
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.serwylo.babybook.book.BookConfig
 import com.serwylo.babybook.book.Page
@@ -208,6 +209,90 @@ data class ParsedWikiSearchResults(
         val sroffset: Int,
         val `continue`: String,
     )
+}
+
+/**
+ * Fetch categories belonging to a page.
+ * Will cache the response, and if a cached response already exists on disk, will use that.
+ *
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+suspend fun loadCategoriesForPage(wikiUrl: URL, title: String, cacheDir: File): List<String> = withContext(Dispatchers.IO) {
+    val cachedFile = File(cacheDir, "${title}.categories.json")
+    if (cachedFile.exists()) {
+        try {
+            println("Cached wiki page categories data exists at ${cachedFile.absolutePath}")
+            return@withContext Gson().fromJson<List<String>?>(
+                cachedFile.readText(),
+                object : TypeToken<List<String>>() {}.type
+            )
+        } catch (e: Exception) {
+            println("Error parsing cached wiki page categories data, will remove it and then load from wikipedia again: ${e.message}")
+            cachedFile.delete()
+        }
+    }
+
+    val url = "$wikiUrl/w/api.php?action=query&prop=categories&titles=$title&format=json&cllimit=500&clshow=!hidden"
+    println("Loading list of categories from $url")
+
+    val categories: List<String> = withContext(Dispatchers.IO) {
+        val response: String = http.get(url)
+
+        val json = JsonParser.parseString(response)
+
+        val pagesJson = json
+            .asJsonObject
+            .getAsJsonObject("query")
+            ?.getAsJsonObject("pages")
+
+        val pageId = pagesJson?.keySet()?.firstOrNull()
+
+        if (pageId == null) {
+            emptyList()
+        } else {
+            pagesJson
+                .getAsJsonObject(pageId)
+                ?.getAsJsonArray("categories")
+                ?.mapNotNull {it.asJsonObject?.get("title")?.asString }
+                ?.map { if (it.startsWith("Category:")) it.substring("Category:".length) else it }
+                ?: emptyList()
+        }
+    }
+
+    println("Caching list of categories to ${cachedFile.absolutePath}")
+    cachedFile.writeText(Gson().toJson(categories))
+
+    return@withContext categories
+}
+
+/**
+ * Fetch the list of pages within a category.
+ * Will cache the response, and if a cached response already exists on disk, will use that.
+ *
+ * @param wikiUrl Base URL of the wikipedia installation to use (e.g. https://en.wikipedia.org)
+ */
+suspend fun loadPagesInCategory(wikiUrl: URL, category: String, cacheDir: File): List<String> = withContext(Dispatchers.IO) {
+    val cachedFile = File(cacheDir, "category.$category.pages.json")
+    if (cachedFile.exists()) {
+        try {
+            println("Cached wiki category pages exists at ${cachedFile.absolutePath}")
+            return@withContext Gson().fromJson(cachedFile.readText(), CategoryMembers::class.java).query.categorymembers.map { it.title }.filterNot { it.startsWith("Category:") }
+        } catch (e: Exception) {
+            println("Error parsing cached category pages, will remove it and then load from wikipedia again: ${e.message}")
+            cachedFile.delete()
+        }
+    }
+
+    val url = "$wikiUrl/w/api.php?action=query&list=categorymembers&cmtitle=Category:$category&cmlimit=500&format=json&cmtpye=page"
+    println("Loading list of category pages from $url")
+
+    val response: CategoryMembers = withContext(Dispatchers.IO) {
+        http.get(url)
+    }
+
+    println("Caching wiki data to ${cachedFile.absolutePath}")
+    cachedFile.writeText(Gson().toJson(response))
+    return@withContext response.query.categorymembers.map { it.title }.filterNot { it.startsWith("Category:") }
 }
 
 /**
@@ -530,6 +615,23 @@ data class WikipediaCommonsFile(
     val license: String,
     val author: String,
 )
+
+data class CategoryMembers(
+    val batchcomplete: String,
+    val query: Query,
+) {
+
+    data class Query(
+        val categorymembers: List<CategoryMember>,
+    )
+
+    data class CategoryMember(
+        val pageid: Long,
+        val ns: Long,
+        val title: String,
+    )
+
+}
 
 data class ParsedWikiPage(
     val parse: Parse,
