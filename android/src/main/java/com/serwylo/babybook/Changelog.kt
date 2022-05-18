@@ -22,6 +22,11 @@ object Changelog {
 
         return WhatsNew.newInstance(
             WhatsNewItem(
+                "Baby lock",
+                "Prevent stray little fingers from closing the app and ordering online shopping while you are not looking.",
+                R.drawable.ic_lock,
+            ),
+            WhatsNewItem(
                 "Swipe (or tap) to turn pages",
                 "Select your preferred option from the settings menu. Volume can still be used to change pages too.",
                 R.drawable.ic_book,
