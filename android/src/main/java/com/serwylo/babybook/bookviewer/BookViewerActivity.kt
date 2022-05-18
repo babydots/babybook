@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NavUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -25,7 +26,9 @@ import com.serwylo.babybook.db.entities.imagePathToFile
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.pdf.generatePdf
 import com.serwylo.babybook.utils.viewInWikipedia
+import com.serwylo.immersivelock.ImmersiveLock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
@@ -33,9 +36,9 @@ import java.io.*
 class BookViewerActivity : AppCompatActivity() {
 
     private lateinit var pageTurnType: String
-
     private lateinit var viewModel: BookViewerViewModel
     private lateinit var binding: ActivityBookViewerBinding
+    private lateinit var immersiveLock: ImmersiveLock
 
     private val onPageChange = object: ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
@@ -66,11 +69,26 @@ class BookViewerActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         binding = ActivityBookViewerBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        immersiveLock = ImmersiveLock.Builder(binding.tapToUnlock)
+            .onStopImmersiveMode {
+                lifecycleScope.launch {
+                    // Without this delay, the showing of the action bar trips over the showing of
+                    // the status bar, and results in it showing behind the status bar. I discovered
+                    // this while reading through the show() code for the support action bar which
+                    // had a hard coded delay of 250ms before starting an animation for showing the
+                    // action bar, specifically due to the fact it wants to wait for the status bar
+                    // to do its thing first.
+                    delay(300)
+                    supportActionBar?.show()
+                }
+            }
+            .build()
 
         val dao = AppDatabase.getInstance(this).bookDao()
         val bookId = intent.extras?.getLong(EXTRA_BOOK_ID) ?: error("Can't view book, expected to find the ID of the book in the Intent $EXTRA_BOOK_ID but not found.")
@@ -87,6 +105,12 @@ class BookViewerActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.lock -> {
+                supportActionBar?.hide()
+                immersiveLock.startImmersiveMode(this)
+                return true
+            }
+
             R.id.view_in_wikipedia -> {
                 viewModel.currentPage()?.wikiPage?.title?.also { title ->
                     lifecycleScope.launch(Dispatchers.IO) {

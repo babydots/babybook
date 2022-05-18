@@ -1,0 +1,5 @@
+Baby lock!
+
+Prevent stray little fingers from accidentally closing the app or editing books while reading.
+
+Donate to support further development of Baby Book.
