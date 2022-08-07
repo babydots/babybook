@@ -17,6 +17,7 @@
         <entry key="android/src/main/res/layout/activity_settings.xml" value="0.1" />
         <entry key="android/src/main/res/layout/dialog_page_image_selector.xml" value="0.35885416666666664" />
         <entry key="android/src/main/res/layout/dialog_page_image_selector_item.xml" value="0.190625" />
+        <entry key="android/src/main/res/layout/dialog_page_image_settings.xml" value="0.359375" />
         <entry key="android/src/main/res/layout/dialog_page_text_input.xml" value="0.359375" />
         <entry key="android/src/main/res/layout/dialog_page_title_input.xml" value="0.5" />
         <entry key="android/src/main/res/layout/dialog_text_input.xml" value="0.19010416666666666" />

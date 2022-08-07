@@ -15,12 +15,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.alexvasilkov.gestures.Settings
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.serwylo.babybook.R
-import com.serwylo.babybook.databinding.ActivityEditBookPageBinding
-import com.serwylo.babybook.databinding.DialogPageImageSelectorBinding
-import com.serwylo.babybook.databinding.DialogPageTextInputBinding
-import com.serwylo.babybook.databinding.DialogPageTitleInputBinding
+import com.serwylo.babybook.databinding.*
 import com.serwylo.babybook.db.AppDatabase
 import com.serwylo.babybook.db.repositories.BookRepository
 import com.serwylo.babybook.mediawiki.WikiSearchResults
@@ -176,15 +174,40 @@ class EditBookPageActivity : AppCompatActivity() {
             val wikiPage = viewModel.wikiPage.value
 
             if (wikiPage != null) {
-                val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
-                view.images.layoutManager = GridLayoutManager(this, 3)
+                // val view = DialogPageImageSelectorBinding.inflate(layoutInflater, null, false)
+                // view.images.layoutManager = GridLayoutManager(this, 3)
+
+                val view = DialogPageImageSettingsBinding.inflate(layoutInflater, null, false)
+
+                view.previewImageSource.controller.settings
+                    .setPanEnabled(true)
+                    .setZoomEnabled(true)
+                    .setRotationEnabled(false)
+                    .setBoundsType(Settings.Bounds.NONE)
+                    .setFitMethod(Settings.Fit.OUTSIDE)
+                    .setMovementArea(1000, 1000)
+                    .setFillViewport(true)
+
+                // view.previewImageSource.controller.state
+                //     .set(50f, 100f, 2f, 2f)
+
+                viewModel.mainImage.observe(this) { image ->
+                    if (image != null) {
+                        Picasso.get()
+                            .load(image.filename)
+                            .into(view.previewImageSource)
+                        view.previewImageSource.visibility = View.VISIBLE
+                    } else {
+                        view.previewImageSource.visibility = View.GONE
+                    }
+                }
 
                 val alert = AlertDialog.Builder(this)
                     .setView(view.root)
                     .setPositiveButton("Close") { _, _ -> }
                     .show()
 
-                val adapter = SelectImageAdapter(images ?: listOf()).also { adapter ->
+                /*val adapter = SelectImageAdapter(images ?: listOf()).also { adapter ->
                     adapter.setImageSelectedListener { wikiImage ->
                         viewModel.mainImage.value = wikiImage
                         alert.dismiss()
@@ -208,7 +231,7 @@ class EditBookPageActivity : AppCompatActivity() {
                     }
                 }
 
-                viewModel.ensureImagesDownloaded(wikiPage)
+                viewModel.ensureImagesDownloaded(wikiPage)*/
             }
         }
 
@@ -269,7 +292,8 @@ class EditBookPageActivity : AppCompatActivity() {
         binding.titleTextIcon.visibility = View.VISIBLE
 
         binding.imageConfig.visibility = View.VISIBLE
-        binding.imageConfigIcon.visibility = View.VISIBLE
+        binding.imageChooseIcon.visibility = View.VISIBLE
+        binding.imageSettingsIcon.visibility = View.VISIBLE
 
         binding.bodyText.visibility = View.VISIBLE
         binding.bodyTextIcon.visibility = View.VISIBLE
@@ -280,7 +304,8 @@ class EditBookPageActivity : AppCompatActivity() {
         binding.titleTextIcon.visibility = View.GONE
 
         binding.imageConfig.visibility = View.GONE
-        binding.imageConfigIcon.visibility = View.GONE
+        binding.imageChooseIcon.visibility = View.GONE
+        binding.imageSettingsIcon.visibility = View.GONE
 
         binding.bodyText.visibility = View.GONE
         binding.bodyTextIcon.visibility = View.GONE

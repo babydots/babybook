@@ -109,4 +109,6 @@ dependencies {
 
     implementation 'io.github.tonnyl:whatsnew:0.1.7'
 
+    implementation 'com.alexvasilkov:gesture-views:2.8.3'
+
 }
