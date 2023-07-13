@@ -17,5 +17,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Gradle build
+    - name: Build Android app
       run: ./gradlew :android:build
+    - name: Build web app
+      run: ./gradlew :web:build
+    - name: Build cli app
+      run: ./gradlew :cli:build
