@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.serwylo.babybook"
         minSdk 21
-        targetSdk 31
+        targetSdk 33
         versionCode 10
         versionName "0.9.0"
 
