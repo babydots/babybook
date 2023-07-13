@@ -66,6 +66,7 @@ class OnboardingActivity : FragmentActivity() {
         binding.pager.unregisterOnPageChangeCallback(onPageChange)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (binding.pager.currentItem == 0) {
             super.onBackPressed()

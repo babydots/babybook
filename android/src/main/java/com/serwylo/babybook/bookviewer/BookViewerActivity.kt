@@ -153,6 +153,7 @@ class BookViewerActivity : AppCompatActivity() {
         startActivityForResult(intent, RESULT_CREATE_FILE)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
 
