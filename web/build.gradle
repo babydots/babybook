@@ -4,8 +4,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
@@ -17,21 +17,22 @@ dependencies {
     implementation "io.ktor:ktor-gson:1.6.3"
     implementation "ch.qos.logback:logback-classic:1.2.5"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 	
 }
 
 project.ext.mainClassName = "com.serwylo.babybook.web.ServerKt"
 
-task run(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
+tasks.register('run', JavaExec) {
+    dependsOn classes
+    mainClass = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     ignoreExitValue = true
 }
 
 // See: https://github.com/siouan/frontend-gradle-plugin/blob/master/examples/multi-projects-war-application/backend/build.gradle
-task processFrontendResources(type: Copy) {
+tasks.register('processFrontendResources', Copy) {
     group 'Frontend'
     description 'Process frontend resources'
     dependsOn project(':client').tasks.named('assembleFrontend')
@@ -40,15 +41,15 @@ task processFrontendResources(type: Copy) {
     into file("${project.buildDir}/resources/main/public")
 }
 
-task dist(type: Jar) {
+tasks.register('dist', Jar) {
     manifest {
         attributes 'Main-Class': project.mainClassName
     }
     duplicatesStrategy("exclude")
-    dependsOn [
-        processFrontendResources,
-        configurations.runtimeClasspath,
-        classes,
+    dependsOn[
+            processFrontendResources,
+            configurations.runtimeClasspath,
+            classes,
     ]
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }

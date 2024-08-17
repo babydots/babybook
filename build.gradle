@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.2.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -13,9 +13,9 @@ buildscript {
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
 
 // For heroku deployments.
-task stage(dependsOn: [':web:dist'])
+tasks.register('stage') { dependsOn[':web:dist'] }
