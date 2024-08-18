@@ -55,7 +55,7 @@ class OnboardingFragment(
 
         binding.title.text = title
         binding.description.text = description
-        binding.image.setImageDrawable(AppCompatResources.getDrawable(context!!, drawableRes))
+        binding.image.setImageDrawable(AppCompatResources.getDrawable(requireContext(), drawableRes))
 
         return binding.root
     }
