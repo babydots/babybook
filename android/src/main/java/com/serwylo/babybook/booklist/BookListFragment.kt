@@ -31,7 +31,7 @@ class BookListFragment : Fragment() {
     ): View {
         val binding = FragmentBookListBinding.inflate(inflater, container, false)
 
-        viewModel.isInEditMode.observe(this) { isInEditMode ->
+        viewModel.isInEditMode.observe(viewLifecycleOwner) { isInEditMode ->
             binding.editMode.visibility = if (isInEditMode) View.VISIBLE else View.GONE
             binding.addBookButton.visibility = if (isInEditMode) View.VISIBLE else View.GONE
         }
@@ -45,7 +45,7 @@ class BookListFragment : Fragment() {
             else -> GridLayoutManager(context, columnCount)
         }
 
-        binding.list.adapter = BookListAdapter(context!!).also { adapter ->
+        binding.list.adapter = BookListAdapter(requireContext()).also { adapter ->
 
             adapter.setBookSelectedListener { book ->
 

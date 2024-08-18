@@ -4,15 +4,15 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
 
-	implementation 'com.google.code.gson:gson:2.8.9'
+	implementation 'com.google.code.gson:gson:2.10'
 
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 
 	implementation "io.ktor:ktor-client-core:1.6.3"
 	implementation "io.ktor:ktor-client-cio:1.6.3"
