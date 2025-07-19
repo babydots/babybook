@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Книжки малыша</string>
+    <string name="title_activity_edit_book">EditBookActivity</string>
+    <string name="prompt_email">Почта</string>
+    <string name="prompt_password">Пароль</string>
+    <string name="action_sign_in">Войти или присоедениться</string>
+    <string name="action_sign_in_short">Войти</string>
+    <string name="welcome">"Добро пожаловать!"</string>
+    <string name="invalid_username">Неправильное имя пользователя</string>
+    <string name="invalid_password">Для пароля нужно хотя бы 5 символов</string>
+    <string name="login_failed">"Вход неудачный"</string>
+
+    <string-array name="page_turn_type_entries">
+        <item>Swiping</item>
+        <item>Tapping page edges</item>
+    </string-array>
+
+    <string-array name="page_turn_type_entry_values">
+        <item>swipe</item>
+        <item>buttons_overlayed</item>
+    </string-array>
+
+</resources>
